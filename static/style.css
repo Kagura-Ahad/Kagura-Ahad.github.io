@@ -1,0 +1,60 @@
+/* Site overrides on top of hugo-profile (loaded via params.customCSS). */
+
+/* --- About: skills as a three-column grid of quiet boxes --- */
+#about .skills { font-weight: 500; }
+#about .skills-title { margin: 0 0 0.75rem; opacity: 0.9; }
+
+#about ul.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+#about ul.skills-grid li {
+  margin: 0;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 14%, transparent);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--primary-color) 5%, transparent);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#about ul.skills-grid li::before { content: none; }
+body.dark #about ul.skills-grid li {
+  border-color: color-mix(in srgb, var(--primary-color-dark) 16%, transparent);
+  background: color-mix(in srgb, var(--primary-color-dark) 6%, transparent);
+}
+@media (max-width: 767.98px) {
+  #about ul.skills-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 575.98px) {
+  #about ul.skills-grid { gap: 0.5rem; }
+  #about ul.skills-grid li { font-size: 0.76rem; padding: 0.3rem 0.5rem; }
+}
+
+/* --- Projects: fixed-height card headers that crop on the right, never the title --- */
+#projects .card .card-head { height: 160px; background: #0f1720; }
+#projects .card .card-head .card-img-top {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left center;
+}
+/* The theme's 1.2x hover zoom pushed the title past the card edge. */
+#projects .card:hover .card-img-top { transform: none; }
+
+/* --- Research & Recognition: card text is markdown now --- */
+#achievements .card-text a {
+  color: var(--text-link-color) !important;
+  text-decoration: none;
+}
+#achievements .card-text a:hover { text-decoration: underline; }
+#achievements .card-text ul { margin: 0.5rem 0 0; padding-left: 1.1rem; }
+#achievements .card-text p { margin-bottom: 0.5rem; }
+body.dark #achievements .card-text a { color: var(--text-link-color-dark) !important; }

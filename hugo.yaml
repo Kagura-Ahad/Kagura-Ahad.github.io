@@ -24,6 +24,7 @@ params:
   favicon: "/fav.png"
   useBootstrapCDN: false
   mathjax: false
+  customCSS: true
   animate: true
 
   theme:
@@ -104,34 +105,73 @@ params:
 
       Research was something I wanted to keep doing after graduation, so I took on a low-resource NLP problem, **grammatical error correction for Urdu**, with a good team and a real data-scarcity challenge. That work was accepted to **Findings of ACL 2026**, where I am first author.
 
-      My main focus now is **inference optimization for vision-language models**: understanding where the time and memory actually go, and how to get the same answers faster. It builds on what I do at work as a Computer Vision Engineer, where I build GPU-accelerated video pipelines that run dozens of live streams in real time, and on my open-source collaboration on the VALI video library.
+      My main focus now is **inference optimization for vision-language models**: understanding where the time and memory actually go, and how to get the same answers faster. It builds on my work as a Computer Vision Pipeline Engineer, getting quantized vision models onto edge accelerators (NVIDIA, Intel, Qualcomm, Blaize), on earlier GPU-accelerated video pipelines that ran dozens of live streams in real time, and on my open-source work on the VALI video library and Ultralytics.
     skills:
       enable: true
       title: "What I work with:"
       items:
-        - "Vision-language models"
-        - "Efficient inference"
+        - "Vision-Language Models (VLMs)"
+        - "Quantization"
+        - "Edge Deployment"
         - "PyTorch"
-        - "CUDA & TensorRT"
-        - "Python & C++"
-        - "Video pipelines (NVDEC)"
-        - "Object detection & tracking"
-        - "Low-resource NLP"
+        - "ONNX"
+        - "CUDA"
+        - "TensorRT"
+        - "Qualcomm QAIRT / QNN / SNPE"
+        - "Hexagon DSP"
+        - "NVIDIA Jetson"
+        - "NVIDIA DeepStream"
+        - "Intel DL Streamer"
+        - "Blaize Picasso SDK"
+        - "GStreamer"
+        - "FFmpeg"
+        - "NVDEC / GPU Video Decoding"
+        - "DLPack & CUDA IPC"
+        - "Real-Time Video Analytics Pipelines"
+        - "Streaming Protocols (RTSP, RTMP, WebRTC)"
+        - "MediaMTX"
+        - "Object Detection (YOLO, DETR, SAM)"
+        - "Pose estimation"
+        - "Multi-object tracking"
+        - "Person re-identification"
+        - "Multi-camera tracking"
+        - "Stereo vision & 3D skeletons"
+        - "Instance segmentation (SAM2)"
+        - "OpenCV"
+        - "LightGBM"
+        - "CVAT & Nuclio"
+        - "Profiling & benchmarking"
+        - "Linux"
+        - "Git"
 
   experience:
     enable: true
     items:
+      - company: "RootBlock Labs"
+        companyUrl: "https://www.linkedin.com/company/rootblock-labs/"
+        jobs:
+          - name: "Computer Vision Pipeline Engineer"
+            date: "September 2026 - Present"
+            info:
+              content: Quantized vision models and streaming pipelines for edge accelerators
+            content: |
+              - Write optimized vision AI pipelines for edge hardware across **NVIDIA** (L4, Jetson Orin Nano), **Intel** (Arc B580), **Qualcomm** (QCS6490 on RB3 Gen 2, Hexagon DSP) and **Blaize** Xplorer X1600 accelerators in Supermicro SYS-E300 edge systems, following one **model → quantize → compile → stream** workflow on each.
+              - Brought up a **QCS6490** board from a stock Ubuntu image and deployed quantized custom vision models on its **Hexagon DSP**: assembled the FastRPC → QNN/SNPE stack by hand and traced DSP library lookups with strace, without touching the firmware. Models are quantized (int8, w8a16) with the QAIRT toolchain and onnx2tf, and run across the DSP in a multi-model **GStreamer** pipeline at **20.6 FPS** end to end on 1080p video.
+              - Ran the vision encoder of OpenAI's **CLIP** (ViT-B/32) fully **int8** on the Hexagon DSP at ~20 ms per image, ~16x faster than PyTorch on the CPU, with **95.7%** zero-shot accuracy versus 98.3% in float on 300 test images. Located the accuracy loss by simulating quantization one tensor group at a time, then evaluated **SmoothQuant** and a class-token bypass that recovered 2.4 points.
+              - Currently working on the **Blaize Picasso SDK** (graph compiler, runtime, quantization and pruning), GStreamer plugins for **Intel**'s Edge AI Suites (**DL Streamer**), and **NVIDIA DeepStream** pipelines.
       - company: "Cloud Tenants"
         companyUrl: "https://www.linkedin.com/company/cloud-tenants-pvt-ltd/"
         jobs:
           - name: "Computer Vision Engineer"
-            date: "July 2025 - Present"
+            date: "July 2025 - October 2026"
             info:
               content: Real-time video analytics on live retail camera feeds
             content: |
               - Built a **real-time surveillance pipeline** handling **30 live camera feeds at once** (720p, 15 FPS) with Python multiprocessing and GPU-accelerated NVDEC decoding, keeping per-stream latency low.
               - Built a **theft-detection module** that flags behaviours such as shoplifting and eating on live store footage: up to **85% detection accuracy** with as few as **2 false alerts per 5-hour window** in crowded aisles. It tracks body movement with YOLOv11-Pose and feeds temporal features (speed, angles, proximity to shelves) to a LightGBM classifier.
-              - Re-implemented Ultralytics' object-tracking logic for batched inference across asynchronous streams, keeping identities stable across frames with BoT-SORT and TransReID.
+              - Re-implemented Ultralytics' object-tracking logic for batched inference across asynchronous streams, keeping identities stable across frames with BoT-SORT. Extended it with **TransReID** person re-identification (TensorRT FP16, batched GPU crops via RoIAlign) fused into BoT-SORT matching, **multi-camera tracking** that assigns global IDs across cameras covering the same aisle, and calibrated **stereo vision** that triangulates 2D keypoints into **3D skeletons**, all integrated into the offense-detection pipelines.
+              - Built an end-to-end **planogram compliance** pipeline for retail shelf photos: YOLO26x-seg product segmentation, Perception Encoder SKU matching and perspective-corrected row/column reconstruction to flag empty and misplaced slots, reaching **98%** agreement with the client's reference planogram on a 20-photo pilot.
+              - Trained the segmentation model on SKU-110K with **SAM2** pseudo-masks (no manual mask annotation) and fine-tuned **PE-Core-B16** with supervised contrastive loss on 1,599 hand-labelled crops, so new products are added from reference crops without retraining.
               - Built a data-labelling pipeline (CVAT + Nuclio serverless) with auto-suggested labels to speed up dataset preparation for the pose and classification models.
             featuredItems:
               fontAwesomeIcons:
@@ -141,7 +181,7 @@ params:
       - company: "Dawlance"
         jobs:
           - name: "Internship & Final Year Project"
-            date: "September 2024"
+            date: "September 2024 - June 2025"
             info:
               content: Real-time hazard detection for workplace safety
             content: |
@@ -167,7 +207,7 @@ params:
         content: |-
           - Best Final Year Project Award (real-time hazard detection, C++/TensorRT/CUDA)
           - Research on Urdu grammatical error correction, published at Findings of ACL 2026
-      - title: "Pre-Engineering (Intermediate)"
+      - title: "Upper Secondary Education (Intermediate)"
         school:
           name: "Government Dehli College"
         date: "2021"
@@ -186,9 +226,17 @@ params:
       - title: "Open source: VALI video library"
         content: "Traced a multi-stream decoding slowdown to Python's GIL (194 FPS threaded vs 390 FPS multiprocess). Working with the library's author led to a native C++ threading fix that is now the library's standard sample."
         url: https://www.linkedin.com/pulse/lets-squeeze-bit-more-performance-out-python-pipeline-arzumanyan-matnf
+      - title: "Open source: Ultralytics"
+        content: "Opened a PR to fix strict-mode type warnings in Model.predict() found while type-checking my own code. Touching the base class cascaded into SAM, FastSAM and YOLOE, so the PR was repurposed into a smaller, safer fix (Path support in imread), which was merged into main with my name on the commit."
+        url: https://github.com/ultralytics/ultralytics/pull/25888
       - title: "GPU Programming Specialization"
-        content: "Four-course CUDA specialization on Coursera (Fall 2025), taken to get the most out of the hardware in real-time vision systems."
-        url: https://coursera.org/share/0c59b29ac538011180f1f9ef96b596b4
+        content: |-
+          Four-course CUDA specialization on Coursera (Fall 2025), taken to get the most out of the hardware in real-time vision systems. [View certificate](https://coursera.org/share/0c59b29ac538011180f1f9ef96b596b4)
+
+          - [Introduction to Concurrent Programming with GPUs](https://www.coursera.org/learn/introduction-to-concurrent-programming)
+          - [Introduction to Parallel Programming with CUDA](https://www.coursera.org/learn/introduction-to-parallel-programming-with-cuda)
+          - [CUDA at Scale for the Enterprise](https://www.coursera.org/learn/cuda-at-scale-for-the-enterprise)
+          - [CUDA Advanced Libraries](https://www.coursera.org/learn/cuda-advanced-libraries)
 
   projects:
     enable: true
@@ -249,6 +297,20 @@ params:
         links:
           - icon: fab fa-github
             url: https://github.com/Kagura-Ahad/Dawlance-RTSMS-Inference-Pipeline-Optimization
+
+      - title: Learning TensorRT 11
+        content: A public, continuously updated log of learning NVIDIA TensorRT 11 from the ground up. Heavily documented examples of the build and V3 async runtime lifecycle, with custom type stubs and notes on why the API is designed the way it is.
+        image: /images/projects/learning-tensorrt.svg
+        featured:
+          name: Code
+          link: https://github.com/Kagura-Ahad/learning_tensorRT
+        badges:
+          - "TensorRT 11"
+          - "Python"
+          - "CUDA"
+        links:
+          - icon: fab fa-github
+            url: https://github.com/Kagura-Ahad/learning_tensorRT
 
       - title: DocsKeeping
         content: A GraphRAG question-answering system that reduces LLM hallucination through knowledge-graph traversal and semantic search, with Guardrails AI anonymizing sensitive data. Co-developed as a Spring 2025 project.

@@ -1,0 +1,132 @@
+/* Docked "you are here" navigator. Built by section-nav.js. */
+#content > section[id] { scroll-margin-top: 70px; }
+
+#section-nav {
+  --sn-accent: var(--primary-color);
+  --sn-text: var(--text-color);
+  --sn-muted: var(--text-secondary-color);
+  --sn-surface: var(--secondary-color);
+  position: fixed;
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1020;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.6rem;
+  padding: 0.85rem 0.7rem;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--sn-surface) 88%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 14px rgba(15, 23, 32, 0.14);
+  font-family: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+body.dark #section-nav {
+  --sn-accent: var(--primary-color-dark);
+  --sn-text: var(--text-color-dark);
+  --sn-muted: var(--text-secondary-color-dark);
+  --sn-surface: var(--secondary-color-dark);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+}
+#section-nav.sn-ready { opacity: 1; pointer-events: auto; }
+
+/* Vertical track with a fill that shows overall progress through the page. */
+#section-nav ol {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+#section-nav ol::before,
+#section-nav .sn-fill {
+  content: "";
+  position: absolute;
+  right: 0.3rem;
+  top: 0.7rem;
+  width: 2px;
+  transform: translateX(50%);
+  border-radius: 1px;
+}
+#section-nav ol::before { bottom: 0.7rem; background: var(--sn-muted); opacity: 0.3; }
+#section-nav .sn-fill {
+  height: calc((100% - 1.4rem) * var(--sn-progress, 0));
+  background: var(--sn-accent);
+  transition: height 0.2s ease-out;
+}
+
+#section-nav a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 0.2rem 0;
+  text-decoration: none;
+  color: var(--sn-muted);
+  font-size: 0.8rem;
+  line-height: 1.1rem;
+}
+#section-nav .sn-label {
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 0;
+  transition: max-width 0.25s ease, opacity 0.2s ease;
+}
+#section-nav .sn-dot {
+  position: relative;
+  flex: none;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--sn-surface);
+  border: 2px solid var(--sn-muted);
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+#section-nav a:hover .sn-label,
+#section-nav a:focus-visible .sn-label,
+#section-nav a.active .sn-label { max-width: 11rem; opacity: 1; }
+#section-nav a:hover { color: var(--sn-text); }
+#section-nav a:focus-visible { outline: 2px solid var(--sn-accent); outline-offset: 2px; border-radius: 4px; }
+#section-nav a.passed .sn-dot { border-color: var(--sn-accent); background: var(--sn-accent); }
+#section-nav a.active { color: var(--sn-accent); font-weight: 600; }
+#section-nav a.active .sn-dot {
+  transform: scale(1.35);
+  border-color: var(--sn-accent);
+  background: var(--sn-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--sn-accent) 22%, transparent);
+}
+
+/* Below 1560px the dock would sit on top of the content, so it becomes a small
+   pill: current section name plus a row of dots showing where it is in the page. */
+@media (max-width: 1559.98px) {
+  #section-nav {
+    top: auto;
+    bottom: 1rem;
+    right: 1rem;
+    transform: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+  }
+  #section-nav .sn-current { font-size: 0.8rem; font-weight: 600; color: var(--sn-accent); white-space: nowrap; }
+  #section-nav ol { flex-direction: row; align-items: center; gap: 0.2rem; }
+  #section-nav ol::before, #section-nav .sn-fill { display: none; }
+  #section-nav a { padding: 0.3rem 0.15rem; }
+  #section-nav .sn-label { display: none; }
+}
+@media (min-width: 1560px) { #section-nav .sn-current { display: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  #section-nav, #section-nav * { transition: none !important; }
+}
+@media print { #section-nav { display: none; } }
