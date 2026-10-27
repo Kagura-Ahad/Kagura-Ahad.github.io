@@ -1,0 +1,302 @@
+baseURL: "https://kagura-ahad.github.io/"
+locale: "en-us"
+title: "Syed Ahad Ali"
+theme: hugo-profile
+
+defaultContentLanguage: "en"
+
+outputs:
+  home:
+    - "HTML"
+  page:
+    - "HTML"
+
+enableRobotsTXT: true
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+
+params:
+  title: "Syed Ahad Ali"
+  description: Computer vision researcher working on efficient inference for vision-language models.
+  favicon: "/fav.png"
+  useBootstrapCDN: false
+  mathjax: false
+  animate: true
+
+  theme:
+    defaultTheme: "light"
+
+  font:
+    fontSize: 1rem
+    fontWeight: 400
+    lineHeight: 1.6
+    textAlign: left
+
+  # Restrained ink-blue palette; quiet on purpose.
+  color:
+    textColor: "#1f2933"
+    secondaryTextColor: "#52606d"
+    textLinkColor: "#1d4e89"
+    backgroundColor: "#f7f8fa"
+    secondaryBackgroundColor: "#1d4e891a"
+    primaryColor: "#1d4e89"
+    secondaryColor: "#ffffff"
+
+    darkmode:
+      textColor: "#e4e7eb"
+      secondaryTextColor: "#9aa5b1"
+      textLinkColor: "#8ab4f8"
+      backgroundColor: "#0f1720"
+      secondaryBackgroundColor: "#161f2b"
+      primaryColor: "#8ab4f8"
+      secondaryColor: "#161f2b"
+
+  navbar:
+    align: ms-auto
+    brandName: "Syed Ahad Ali"
+    disableSearch: true
+    stickyNavBar:
+      enable: true
+      showOnScrollUp: true
+    enableSeparator: false
+    menus:
+      disableAbout: false
+      disableExperience: false
+      disableEducation: false
+      disableProjects: false
+      disableAchievements: false
+      disableContact: false
+
+  hero:
+    enable: true
+    intro: "Hi, I'm"
+    title: "Syed Ahad Ali."
+    subtitle: "Computer vision, and making vision-language models fast."
+    content: "I love computer vision. After finishing my BSc in Computer Science in 2025 I kept at it: first publishing low-resource NLP research at **ACL Findings**, and now researching **inference optimization for vision-language models**, backed by a systems background in real-time GPU video pipelines."
+    image: /images/me.jpg
+    roundImage: true
+    bottomImage:
+      enable: true
+    button:
+      enable: true
+      name: "Read my ACL paper"
+      url: "https://aclanthology.org/2026.findings-acl.2156/"
+      download: false
+      newPage: true
+    socialLinks:
+      fontAwesomeIcons:
+        - icon: fab fa-github
+          url: https://github.com/Kagura-Ahad
+        - icon: fab fa-linkedin
+          url: https://www.linkedin.com/in/ahad-ali-01085a22a/
+        - icon: fas fa-envelope
+          url: mailto:ahad2ali3@gmail.com
+
+  about:
+    enable: true
+    title: "About Me"
+    image: "/images/me.jpg"
+    content: |-
+      I graduated from Habib University in June 2025 with a BSc in Computer Science, and computer vision is the thread running through everything I've done since. My final year project, a real-time hazard-detection system, won the **Best FYP Award**.
+
+      Research was something I wanted to keep doing after graduation, so I took on a low-resource NLP problem, **grammatical error correction for Urdu**, with a good team and a real data-scarcity challenge. That work was accepted to **Findings of ACL 2026**, where I am first author.
+
+      My main focus now is **inference optimization for vision-language models**: understanding where the time and memory actually go, and how to get the same answers faster. It builds on what I do at work as a Computer Vision Engineer, where I build GPU-accelerated video pipelines that run dozens of live streams in real time, and on my open-source collaboration on the VALI video library.
+    skills:
+      enable: true
+      title: "What I work with:"
+      items:
+        - "Vision-language models"
+        - "Efficient inference"
+        - "PyTorch"
+        - "CUDA & TensorRT"
+        - "Python & C++"
+        - "Video pipelines (NVDEC)"
+        - "Object detection & tracking"
+        - "Low-resource NLP"
+
+  experience:
+    enable: true
+    items:
+      - company: "Cloud Tenants"
+        companyUrl: "https://www.linkedin.com/company/cloud-tenants-pvt-ltd/"
+        jobs:
+          - name: "Computer Vision Engineer"
+            date: "July 2025 - Present"
+            info:
+              content: Real-time video analytics on live retail camera feeds
+            content: |
+              - Built a **real-time surveillance pipeline** handling **30 live camera feeds at once** (720p, 15 FPS) with Python multiprocessing and GPU-accelerated NVDEC decoding, keeping per-stream latency low.
+              - Built a **theft-detection module** that flags behaviours such as shoplifting and eating on live store footage: up to **85% detection accuracy** with as few as **2 false alerts per 5-hour window** in crowded aisles. It tracks body movement with YOLOv11-Pose and feeds temporal features (speed, angles, proximity to shelves) to a LightGBM classifier.
+              - Re-implemented Ultralytics' object-tracking logic for batched inference across asynchronous streams, keeping identities stable across frames with BoT-SORT and TransReID.
+              - Built a data-labelling pipeline (CVAT + Nuclio serverless) with auto-suggested labels to speed up dataset preparation for the pose and classification models.
+            featuredItems:
+              fontAwesomeIcons:
+                - icon: fab fa-github
+                  url: https://github.com/Kagura-Ahad/NVDEC-ParaFlow
+                  tooltip: Open-source writeup of the multi-stream decoding architecture
+      - company: "Dawlance"
+        jobs:
+          - name: "Internship & Final Year Project"
+            date: "September 2024"
+            info:
+              content: Real-time hazard detection for workplace safety
+            content: |
+              - Built a **real-time hazard-detection system in C++** for a workplace-safety application, using GStreamer for video handling, OpenCV DNN (YOLOv9 on GPU) for detection and a custom **C++ ByteTrack** implementation for tracking. It reached up to **90% accuracy** with near-zero false positives.
+              - Made it **2x faster** by moving inference to **NVIDIA TensorRT** and rewriting core data handling directly against the CUDA API.
+              - The project won the **Best FYP Award**.
+            featuredItems:
+              fontAwesomeIcons:
+                - icon: fab fa-github
+                  url: https://github.com/Kagura-Ahad/Dawlance-RTSMS-Inference-Pipeline-Optimization
+                  tooltip: Stage-by-stage optimization writeup
+
+  education:
+    enable: true
+    index: false
+    items:
+      - title: "BSc in Computer Science"
+        school:
+          name: "Habib University"
+          url: "https://habib.edu.pk"
+        date: "Graduated June 2025"
+        GPA: "3.26 / 4.00"
+        content: |-
+          - Best Final Year Project Award (real-time hazard detection, C++/TensorRT/CUDA)
+          - Research on Urdu grammatical error correction, published at Findings of ACL 2026
+      - title: "Pre-Engineering (Intermediate)"
+        school:
+          name: "Government Dehli College"
+        date: "2021"
+        GPA: "93.9%"
+
+  achievements:
+    enable: true
+    title: "Research & Recognition"
+    items:
+      - title: "Findings of ACL 2026 (first author)"
+        content: "Corpora Generation for Urdu Grammatical Error Correction. A synthetic-data pipeline producing 1.27M+ sentence pairs, and a gold-standard evaluation set."
+        url: https://aclanthology.org/2026.findings-acl.2156/
+      - title: "Best Final Year Project Award"
+        content: "For a real-time hazard-detection system built in C++ with TensorRT and CUDA."
+        url: https://www.facebook.com/photo/?fbid=705036795405123&set=a.705005642074905
+      - title: "Open source: VALI video library"
+        content: "Traced a multi-stream decoding slowdown to Python's GIL (194 FPS threaded vs 390 FPS multiprocess). Working with the library's author led to a native C++ threading fix that is now the library's standard sample."
+        url: https://www.linkedin.com/pulse/lets-squeeze-bit-more-performance-out-python-pipeline-arzumanyan-matnf
+      - title: "GPU Programming Specialization"
+        content: "Four-course CUDA specialization on Coursera (Fall 2025), taken to get the most out of the hardware in real-time vision systems."
+        url: https://coursera.org/share/0c59b29ac538011180f1f9ef96b596b4
+
+  projects:
+    enable: true
+    items:
+      - title: Corpora Generation for Urdu GEC
+        content: Learns real error patterns from Urdu Wikipedia edit history and injects them into clean sentences to build UrduGEC-Synthetic, then evaluates fine-tuned models on a new gold set drawn from students' exam copies.
+        image: /images/projects/urdu-gec.svg
+        featured:
+          name: Paper
+          link: https://aclanthology.org/2026.findings-acl.2156/
+        badges:
+          - "ACL Findings 2026"
+          - "NLP"
+          - "Low-resource"
+        links:
+          - icon: fas fa-file-lines
+            url: https://aclanthology.org/2026.findings-acl.2156/
+
+      - title: NVDEC-ParaFlow
+        content: A pure-Python equivalent of DeepStream's nvstreammux. Decoder processes hand zero-copy GPU frames to a batched YOLO predictor via DLPack and CUDA IPC, giving +31.2% throughput over a GIL-released multithreaded design.
+        image: /images/projects/paraflow.svg
+        featured:
+          name: Code
+          link: https://github.com/Kagura-Ahad/NVDEC-ParaFlow
+        badges:
+          - "CUDA IPC"
+          - "DLPack"
+          - "NVDEC"
+          - "PyTorch"
+        links:
+          - icon: fab fa-github
+            url: https://github.com/Kagura-Ahad/NVDEC-ParaFlow
+
+      - title: NVDEC Tensor Parity
+        content: Why does swapping CPU decoding for GPU decoding change tracker IDs? Root-cause analysis and a sequential GPU emulation of the OpenCV path that restores near bit-exact input tensors.
+        image: /images/projects/tensor-parity.svg
+        featured:
+          name: Code
+          link: https://github.com/Kagura-Ahad/nvdec-tensor-parity
+        badges:
+          - "NVDEC"
+          - "PyTorch"
+          - "OpenCV"
+        links:
+          - icon: fab fa-github
+            url: https://github.com/Kagura-Ahad/nvdec-tensor-parity
+
+      - title: RTSMS Inference Optimization
+        content: A stage-by-stage record of speeding up a YOLOv9 + ByteTrack pipeline, from ~26 FPS in PyTorch to ~85 FPS with TensorRT, with profiling, benchmarks and an honest account of what didn't work yet.
+        image: /images/projects/rtsms.svg
+        featured:
+          name: Code
+          link: https://github.com/Kagura-Ahad/Dawlance-RTSMS-Inference-Pipeline-Optimization
+        badges:
+          - "C++"
+          - "TensorRT"
+          - "ByteTrack"
+        links:
+          - icon: fab fa-github
+            url: https://github.com/Kagura-Ahad/Dawlance-RTSMS-Inference-Pipeline-Optimization
+
+      - title: DocsKeeping
+        content: A GraphRAG question-answering system that reduces LLM hallucination through knowledge-graph traversal and semantic search, with Guardrails AI anonymizing sensitive data. Co-developed as a Spring 2025 project.
+        image: /images/projects/docskeeping.svg
+        featured:
+          name: Code
+          link: https://github.com/burhanuddin6/docskeeping
+        badges:
+          - "GraphRAG"
+          - "Neo4j"
+          - "LLMs"
+        links:
+          - icon: fab fa-github
+            url: https://github.com/burhanuddin6/docskeeping
+
+  contact:
+    enable: true
+    content: I'm always glad to talk about vision-language models, efficient inference, or research collaboration. My inbox is open.
+    btnName: Email me
+    btnLink: mailto:ahad2ali3@gmail.com
+
+  footer:
+    recentPosts:
+      enable: false
+    socialNetworks:
+      github: https://github.com/Kagura-Ahad
+      linkedin: https://www.linkedin.com/in/ahad-ali-01085a22a/
+
+  listPages:
+    disableFeaturedImage: false
+
+  singlePages:
+    socialShare: false
+    readTime:
+      enable: true
+      content: "min read"
+    scrollprogress:
+      enable: true
+    tags:
+      openInNewTab: true
+
+  terms:
+    read: "Read"
+    toc: "Table Of Contents"
+    copyright: "All rights reserved"
+    emailText: "Check out this site"
+
+  datesFormat:
+    article: "Jan 2, 2006"
+    articleList: "Jan 2, 2006"
+    articleRecent: "Jan 2, 2006"

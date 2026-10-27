@@ -1,0 +1,6 @@
+public/
+resources/_gen/
+.hugo_build.lock
+# Local reference material (cloned repos, resume sources). Not for publishing.
+_temp_sources/
+CLAUDE.md
