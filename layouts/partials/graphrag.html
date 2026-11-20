@@ -1,0 +1,21 @@
+{{- /* GraphRAG layer pyramid + numbered explanation. Called with (dict "g" <graphrag> "id" <string>). Styles: static/flow.css */ -}}
+{{- $g := .g -}}
+<figure class="flow flow-gr" id="gr-{{ .id }}" role="group" aria-label="{{ $g.alt }}">
+  <div class="gr-visual">{{ partial "graphrag-svg.html" . }}</div>
+  <div class="gr-side">
+    <ol class="gr-steps">
+      {{ range $i, $s := $g.steps }}
+      <li class="gr-step scope-{{ $s.scope }}">
+        <i class="gr-num">{{ add $i 1 }}</i>
+        <div>
+          <b>{{ $s.title }}{{ if $s.llm }}<img class="gr-llm" src="{{ "images/icons/llm.svg" | relURL }}" alt="LLM" title="done by an LLM" width="26" height="23">{{ end }}</b>
+          <p>{{ $s.text | markdownify }}</p>
+          <span class="gr-pill {{ $s.scope }}">{{ if eq $s.scope "in" }}built in DocsKeeping{{ else }}future work{{ end }}</span>
+        </div>
+      </li>
+      {{ end }}
+    </ol>
+    {{ with $g.ask }}<div class="gr-ask"><b>{{ .title }}</b><p>{{ .text | markdownify }}</p></div>{{ end }}
+  </div>
+</figure>
+{{ with $g.caption }}<p class="flow-caption"><strong>{{ $g.title }}.</strong> {{ . | markdownify }}</p>{{ end }}

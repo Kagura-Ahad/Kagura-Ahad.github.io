@@ -1,0 +1,145 @@
+{{ define "head" }}
+<meta name="description" content="{{ .Description | default .Title }}">
+<script defer src="{{ (printf "%sfontawesome-6/all-6.4.2.js" (.Site.Params.staticPath | default "")) | relURL }}"></script>
+<script defer src="{{ "projects-switcher.js" | relURL }}"></script>
+<link rel="stylesheet" href="{{ "flow.css" | relURL }}">
+<script defer src="{{ "flow.js" | relURL }}"></script>
+{{ end }}
+
+{{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
+
+{{ define "main" }}
+<div class="container projects-page py-5">
+  <h2 class="projects-heading">{{ .Title }}</h2>
+  <p class="projects-lede">{{ .Description }}</p>
+
+  <nav class="project-switcher" aria-label="Choose a project">
+    {{ range .Site.Params.projects.items }}
+    {{ if or .figures .flow .notes .graphrag }}
+    <a class="chip" href="#{{ .id }}" data-project="{{ .id }}">{{ .short | default .title }}</a>
+    {{ else }}
+    <span class="chip chip-disabled" title="Diagram in progress">{{ .short | default .title }}</span>
+    {{ end }}
+    {{ end }}
+  </nav>
+
+  {{ range .Site.Params.projects.items }}
+  {{ if or .figures .flow .notes .graphrag }}
+  <section class="project-entry" id="{{ .id }}">
+    <div class="project-head">
+      <div class="project-badges">
+        {{ range .badges }}<span class="badge badge-secondary">{{ . }}</span>{{ end }}
+      </div>
+      <h3 class="project-title">{{ .title }}</h3>
+      <div class="project-links">
+        {{ if .buttons }}
+        {{ range .buttons }}<a class="btn btn-sm" href="{{ .link }}" target="_blank" rel="noopener">{{ if .icon }}<i class="{{ .icon }}"></i> {{ end }}{{ .name }} <i class="fas fa-arrow-up-right-from-square"></i></a> {{ end }}
+        {{ else }}
+        {{ with .featured }}<a class="btn btn-sm" href="{{ .link }}" target="_blank" rel="noopener">{{ .name }} <i class="fas fa-arrow-up-right-from-square"></i></a>{{ end }}
+        {{ end }}
+      </div>
+    </div>
+
+    <p class="project-summary">{{ .content | markdownify }}</p>
+
+    {{ with .stats }}
+    <ul class="project-stats">
+      {{ range . }}
+      <li><span class="stat-value">{{ .value }}</span><span class="stat-label">{{ .label }}</span></li>
+      {{ end }}
+    </ul>
+    {{ end }}
+
+    {{ $e := . }}
+    {{ with .graphrag }}
+    {{ partial "graphrag.html" (dict "g" . "id" $e.id) }}
+    {{ end }}
+    {{ with .flow }}
+    {{ partial "flow.html" (dict "flow" . "id" $e.id) }}
+    {{ end }}
+    {{ range .figures }}
+    <figure class="project-figure">
+      <div class="figure-panel"><img src="{{ .src | relURL }}" alt="{{ .alt }}" loading="lazy"></div>
+      <figcaption><strong>{{ .title }}.</strong> {{ .caption | markdownify }}</figcaption>
+    </figure>
+    {{ end }}
+
+
+    {{ with .notes }}
+    <div class="notes-card">
+      {{ range .sections }}
+      {{ $sec := . }}
+      <h4 class="notes-title">{{ .title }}</h4>
+      {{ with .text }}<p class="notes-text">{{ . | markdownify }}</p>{{ end }}
+      {{ with .compare }}
+      <div class="notes-compare">
+        <div class="cmp cmp-ok"><b>{{ .left.title }}</b><ul>{{ range .left.items }}<li>{{ . | markdownify }}</li>{{ end }}</ul></div>
+        <div class="cmp cmp-need"><b>{{ .right.title }}</b><ul>{{ range .right.items }}<li>{{ . | markdownify }}</li>{{ end }}</ul></div>
+      </div>
+      {{ end }}
+      {{ with .after }}<p class="notes-text notes-after">{{ . | markdownify }}</p>{{ end }}
+      {{ with .items }}
+      <ul class="notes-list{{ if $sec.checklist }} is-checklist{{ end }}">
+        {{ range . }}<li{{ if .done }} class="done"{{ end }}><span class="notes-mark" aria-hidden="true"></span><span>{{ .text | markdownify }}</span></li>{{ end }}
+      </ul>
+      {{ end }}
+      {{ end }}
+      {{ with .note }}<p class="notes-note">{{ . }}</p>{{ end }}
+    </div>
+    {{ end }}
+
+    {{ with .bars }}
+    {{ $unit := .unit }}
+    {{ $d := 1 }}{{ if isset . "decimals" }}{{ $d = .decimals }}{{ end }}
+    {{ $fmt := printf "%%.%df" $d }}
+    {{ $max := 0.0 }}
+    {{ range .items }}{{ if gt (float .value) $max }}{{ $max = float .value }}{{ end }}{{ end }}
+    <div class="bars-card">
+      <h4 class="bars-title">{{ .title }}</h4>
+      {{ range .items }}
+      <div class="bar-row bar-{{ .tone }}">
+        <span class="bar-label">{{ .label }}</span>
+        <div class="bar-track"><div class="bar-fill" style="width: {{ div (mul (float .value) 100.0) $max }}%"></div></div>
+        <span class="bar-value">{{ printf $fmt (float .value) }} {{ $unit }}{{ with .delta }} <span class="bar-delta">{{ . }}</span>{{ end }}</span>
+      </div>
+      {{ end }}
+      {{ with .note }}<p class="bars-note">{{ . }}</p>{{ end }}
+    </div>
+    {{ end }}
+
+    {{ with .parity }}
+    <div class="parity-banner">
+      <strong>{{ .title }}</strong>
+      <span>{{ .text }}</span>
+    </div>
+    {{ end }}
+
+    {{ with .outcomes }}
+    <h4 class="outcomes-title">{{ .title }}</h4>
+    <div class="outcome-cards">
+      {{ range .cards }}
+      <div class="outcome-card outcome-{{ .kind }}">
+        <div class="outcome-head"><span class="outcome-icon" aria-hidden="true"></span>{{ .title }}</div>
+        <div class="outcome-body">
+          <div class="scenes">
+            {{ range .frames }}
+            <div class="scene">
+              <div class="frame" style="--dx: {{ .dx }}%">
+                <span class="person"></span>
+                <span class="bbox bbox-{{ .state }}"><span class="bbox-tag">{{ .tag }}</span></span>
+              </div>
+              <span class="frame-label">frame {{ .label }}</span>
+            </div>
+            {{ end }}
+          </div>
+          <p class="outcome-text">{{ .text | markdownify }}</p>
+        </div>
+      </div>
+      {{ end }}
+    </div>
+    {{ end }}
+  </section>
+  {{ end }}
+  {{ end }}
+</div>
+{{ end }}

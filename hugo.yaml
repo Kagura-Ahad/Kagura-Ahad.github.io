@@ -28,7 +28,7 @@ params:
   animate: true
 
   theme:
-    defaultTheme: "light"
+    defaultTheme: "auto"
 
   font:
     fontSize: 1rem
@@ -60,7 +60,7 @@ params:
     brandName: "Syed Ahad Ali"
     disableSearch: true
     stickyNavBar:
-      enable: true
+      enable: false   # replaced by static/navbar.js (smoother, and coordinates with the project chips)
       showOnScrollUp: true
     enableSeparator: false
     menus:
@@ -179,6 +179,7 @@ params:
                   url: https://github.com/Kagura-Ahad/NVDEC-ParaFlow
                   tooltip: Open-source writeup of the multi-stream decoding architecture
       - company: "Dawlance"
+        companyUrl: "https://www.linkedin.com/company/dawlance/"
         jobs:
           - name: "Internship & Final Year Project"
             date: "September 2024 - June 2025"
@@ -242,11 +243,19 @@ params:
     enable: true
     items:
       - title: Corpora Generation for Urdu GEC
-        content: Learns real error patterns from Urdu Wikipedia edit history and injects them into clean sentences to build UrduGEC-Synthetic, then evaluates fine-tuned models on a new gold set drawn from students' exam copies.
-        image: /images/projects/urdu-gec.svg
+        id: urdu-gec
+        tagline: "Synthetic training data for a language that has almost none."
+        headline: { value: "1.27M", label: "synthetic sentence pairs" }
+        short: Urdu GEC
+        content: Urdu has almost no paired correct and incorrect sentences to train grammar correction on. This pipeline manufactures them. It learns how real errors look from Urdu Wikipedia's edit history, re-creates those errors on clean text to build UrduGEC-Synthetic, and tests fine-tuned models on UrduGEC-Gold, real mistakes from students' exam copies.
         featured:
           name: Paper
           link: https://aclanthology.org/2026.findings-acl.2156/
+        buttons:
+          - { name: "Paper", link: "https://aclanthology.org/2026.findings-acl.2156/" }
+          - { name: "Code", link: "https://github.com/burhanuddin6/gec_pipeline" }
+          - { name: "Synthetic dataset", link: "https://huggingface.co/datasets/Kagura-Ahad-123/UrduGEC-Synthetic", icon: "fas fa-database" }
+          - { name: "Gold dataset", link: "https://huggingface.co/datasets/Kagura-Ahad-123/UrduGEC-Gold", icon: "fas fa-database" }
         badges:
           - "ACL Findings 2026"
           - "NLP"
@@ -254,13 +263,85 @@ params:
         links:
           - icon: fas fa-file-lines
             url: https://aclanthology.org/2026.findings-acl.2156/
+        stats:
+          - value: "1.27M"
+            label: "synthetic training pairs, no manual annotation"
+          - value: "1,613"
+            label: "gold test pairs from real exam copies"
+          - value: "22.2 → 30.2"
+            label: "F0.5 for mT0-large after fine-tuning"
+        bars:
+          title: "F0.5 on UrduGEC-Gold, mT0-large with different training data"
+          unit: "F0.5"
+          decimals: 2
+          items:
+            - { label: "Our synthetic data (UrduGEC-Synthetic)", value: 30.22, tone: gpu, delta: "best, p < 0.01" }
+            - { label: "No fine-tuning (zero-shot)", value: 22.15, tone: muted }
+            - { label: "Random noise injection", value: 19.79, tone: muted }
+            - { label: "Raw Wiki-Edits", value: 13.22, tone: muted }
+            - { label: "Neural error generation (back-translation)", value: 7.05, tone: muted }
+          note: "The same data lifts all three models tested: ByT5-base goes from 6.2 to 25.9 and NLLB-3.3B from 7.0 to 26.1. Trade-off: the corrector is conservative, with high precision (40.5) but lower recall (15.0), which suits F0.5."
+        flow:
+          title: "From Wikipedia edits to a trained and tested corrector"
+          alt: "A three-phase flow. Phase 1, annotate: Urdu Wikipedia revision histories are mined for edit pairs, analysed with Stanza, aligned into insertions, deletions and substitutions, and stored as kernel patterns in an error pattern database. Phase 2, inflict: sentences from the Makhzan corpus are scanned with a sliding window, matched against the learned patterns, checked with a lemma constraint, and corrupted with one error, producing the 1.27 million pair UrduGEC-Synthetic corpus. Phase 3, train and test: mT0-large, ByT5-base and NLLB-3.3B are fine-tuned on the synthetic corpus and evaluated on UrduGEC-Gold, 1,613 real pairs from student exam copies."
+          caption: "The pipeline needs no hand-written Urdu rules and no manual annotation: error patterns are learned from real edits and then applied to clean sentences. Only real exam errors are used for testing."
+          connectors:
+            - { mode: down, from: db, to: b3, label: "learned error patterns" }
+            - { mode: down, from: b0, to: c0 }
+          rows:
+            - accent: cpu
+              label: "PHASE 1 · ANNOTATE"
+              text: "learn how real Urdu grammar errors look, from Wikipedia edit history"
+              parts:
+                - lane:
+                    items:
+                      - { id: a0, kind: tensor, title: "Urdu Wikipedia", sub: "revision histories" }
+                      - { id: a1, kind: amber, num: 1, title: "Mine edit pairs", sub: "last revision correct, previous incorrect; ≈ 240K grammar-only pairs" }
+                      - { id: a2, kind: amber, num: 2, title: "Analyse", sub: "Stanza: POS tags, lemmas, morphology" }
+                      - { id: a3, kind: amber, num: 3, title: "Align", sub: "ERRANT-style: insertion, deletion or substitution" }
+                      - { id: a4, kind: amber, num: 4, title: "Learn patterns", sub: "kernel `k = 3`: POS context plus the morphological change" }
+                      - { id: db, kind: drum, title: "Error pattern database", sub: "how real errors look", arrow: none }
+            - accent: pre
+              label: "PHASE 2 · INFLICT"
+              text: "re-create those errors on clean sentences"
+              parts:
+                - lane:
+                    dir: rtl
+                    items:
+                      - { id: b5, kind: tensor, title: "Makhzan corpus", sub: "≈ 270K clean Urdu sentences" }
+                      - { id: b4, kind: teal, num: 5, title: "Slide a window", sub: "analyse every `k = 3` context with Stanza" }
+                      - { id: b3, kind: teal, num: 6, title: "Match a pattern", sub: "window equals the correct side of a learned pattern" }
+                      - { id: b2, kind: teal, num: 7, title: "Check the lemma", sub: "the error must be a real inflection of the same word" }
+                      - { id: b1, kind: teal, num: 8, title: "Inflict one error", sub: "substitute, delete or insert; rarer patterns sampled more" }
+                      - { id: b0, kind: tensor, title: "UrduGEC-Synthetic", sub: "1.27M sentence pairs" }
+            - accent: gpu
+              label: "PHASE 3 · TRAIN AND TEST"
+              text: "fine-tune on the synthetic data, test on real errors"
+              parts:
+                - lane:
+                    items:
+                      - { id: c0, kind: gpu, num: 9, title: "Fine-tune", sub: "mT0-large, ByT5-base, NLLB-3.3B" }
+                      - { id: c1, kind: gpu, num: 10, title: "Evaluate", sub: "F0.5 and GLEU, plus an LLM judge", arrow: none }
+                      - { id: c2, kind: tensor, title: "UrduGEC-Gold", sub: "1,613 real pairs from student exam copies", arrow: left }
+                      - callout: { tone: purple, span: 3, title: "Why Gold is kept separate", text: "Gold is made of real mistakes from student exam papers and grammar workbooks, filtered by linguists. It is used only for testing, so the scores reflect real errors rather than synthetic ones." }
+          legend:
+            - { swatch: dark, text: "dataset" }
+            - { swatch: pre, text: "processing step (colour = phase)" }
+            - { swatch: gpu, text: "model training" }
+            - { text: "numbers show the order of the steps" }
 
       - title: NVDEC-ParaFlow
-        content: A pure-Python equivalent of DeepStream's nvstreammux. Decoder processes hand zero-copy GPU frames to a batched YOLO predictor via DLPack and CUDA IPC, giving +31.2% throughput over a GIL-released multithreaded design.
-        image: /images/projects/paraflow.svg
+        id: nvdec-paraflow
+        tagline: "Many video streams, one batched predictor, pure Python."
+        headline: { value: "+31.2%", label: "throughput vs. multithreading" }
+        short: ParaFlow
+        content: Batch many live video streams through one YOLO predictor in pure Python, without DeepStream. Each stream gets its own decoder process that decodes on NVDEC straight into a PyTorch tensor and hands it over by CUDA IPC, so frames never leave the GPU and the Python GIL stops being the bottleneck. A pure-Python stand-in for DeepStream's nvstreammux.
         featured:
           name: Code
           link: https://github.com/Kagura-Ahad/NVDEC-ParaFlow
+        buttons:
+          - { name: "Code", link: "https://github.com/Kagura-Ahad/NVDEC-ParaFlow" }
+          - { name: "Recognition", link: "https://www.linkedin.com/pulse/lets-squeeze-bit-more-performance-out-python-pipeline-arzumanyan-matnf", icon: "fas fa-award" }
         badges:
           - "CUDA IPC"
           - "DLPack"
@@ -269,10 +350,80 @@ params:
         links:
           - icon: fab fa-github
             url: https://github.com/Kagura-Ahad/NVDEC-ParaFlow
+        stats:
+          - value: "+31.2%"
+            label: "throughput vs. multithreading"
+          - value: "395.6 FPS"
+            label: "total, 4 × 1080p streams"
+          - value: "Zero-copy"
+            label: "frames stay in VRAM"
+        bars:
+          title: "Throughput on 4 × 1080p streams"
+          unit: "FPS"
+          items:
+            - { label: "Approach 2: ParaFlow (multiprocess + CUDA IPC)", value: 395.6, tone: gpu, delta: "+31.2%" }
+            - { label: "Approach 1: multithreaded, GIL released in C++", value: 272.0, tone: cpu }
+          note: "Trade-off: multiprocessing costs one CUDA context per decoder (more VRAM) and some IPC plumbing. The multithreaded design is simpler and lighter on VRAM. Measured with YOLO11s-Pose, batch size 4, on an i9-14900K and RTX 4060 Ti."
+        flow:
+          title: "Two ways to feed one batched predictor"
+          alt: "Two rows compare Approach 1, a single Python process whose reader, preprocessing and inference threads share one GIL while decoding on NVDEC and batching, with Approach 2, ParaFlow, where one decoder process per stream decodes on NVDEC into a pre-allocated torch tensor and shares a CUDA IPC handle through a queue to a single predictor process that batches the frames and runs YOLO."
+          caption: "Approach 1 releases the GIL inside native decode calls, but its threads still coordinate batching in Python. Approach 2 gives every stream its own process and context, and only a small CUDA IPC handle crosses the process boundary, never the pixels."
+          source: { title: "N video streams", text: "RTSP or video files" }
+          connectors:
+            - { mode: elbow, from: src, to: m1 }
+            - { mode: elbow, from: src, to: p1 }
+          rows:
+            - accent: cpu
+              label: "APPROACH 1"
+              text: "multithreading: one process, one CUDA context, the GIL released inside native calls"
+              parts:
+                - zone:
+                    kind: proc
+                    title: "Python process"
+                    sub: "a CPU-side handle: 1 GIL, owns 1 CUDA context"
+                    band: { title: "GPU · VRAM", sub: "1 CUDA context: NVDEC surfaces and RGB tensors live here" }
+                    steps:
+                      - { id: m1, kind: py, title: "Reader threads ×N", sub: "read compressed packets per stream", tag: "GIL" }
+                      - { id: m2, kind: gpu, title: "Decode + convert", sub: "NVDEC, RGB tensor via DLPack, round-robin", tag: "GIL", down: true }
+                      - { id: m3, kind: py, title: "Queue", sub: "(tensor, CUDA event) pairs" }
+                      - { id: m4, kind: py, title: "Batch assemble", sub: "inference thread waits on events, stacks", tag: "GIL" }
+                      - { id: m5, kind: gpu, title: "Batched YOLO", sub: "one forward pass", down: true }
+                - callout: { tone: heavy, title: "Where the time goes", text: "Decoding runs in parallel, but the Python threads still coordinate batch assembly. That overhead leaves about **31%** of the GPU idle." }
+            - accent: gpu
+              label: "APPROACH 2"
+              text: "ParaFlow: one decoder process per stream, one predictor, frames shared by CUDA IPC"
+              parts:
+                - zone:
+                    kind: proc
+                    stack: true
+                    title: "Decoder process ×N"
+                    sub: "CPU handle, owns its own CUDA context"
+                    band: { title: "GPU · VRAM", sub: "×N CUDA contexts, one per decoder" }
+                    steps:
+                      - { id: p1, kind: gpu, title: "NVDEC decode", sub: "hardware decoder, NV12 surface", down: true }
+                      - { id: p2, kind: gpu, title: "Convert into tensor", sub: "NV12 → RGB, written straight into a pre-allocated torch tensor", down: true }
+                      - { id: p3, kind: py, title: "share_memory_()", sub: "publishes a CUDA IPC handle" }
+                - link: { kind: light, label: "process boundary", title: "IPC handle", sub: "mp.Queue", tag: "NO PIXEL COPY", band: { top: "same VRAM", bottom: "mapped by IPC" } }
+                - zone:
+                    kind: proc
+                    title: "Predictor process"
+                    sub: "CPU handle, owns 1 CUDA context"
+                    band: { title: "GPU · VRAM", sub: "predictor's context reads the shared tensors" }
+                    steps:
+                      - { id: q1, kind: py, title: "Collect handles", sub: "pointers only, frames stay in VRAM" }
+                      - { id: q2, kind: py, title: "Batch", sub: "reshape, normalise, `torch.stack`" }
+                      - { id: q3, kind: gpu, title: "Batched YOLO", sub: "one forward pass", down: true }
+          legend:
+            - { swatch: gpu, text: "GPU work, runs in VRAM" }
+            - { swatch: py, text: "Python coordination on the CPU" }
+            - { tag: "GIL", text: "threads that share one GIL" }
 
       - title: NVDEC Tensor Parity
-        content: Why does swapping CPU decoding for GPU decoding change tracker IDs? Root-cause analysis and a sequential GPU emulation of the OpenCV path that restores near bit-exact input tensors.
-        image: /images/projects/tensor-parity.svg
+        id: nvdec-tensor-parity
+        tagline: "GPU decoding that keeps tracker IDs identical to the CPU path."
+        headline: { value: "0.011", label: "RMSE vs. the CPU input tensor" }
+        short: Tensor Parity
+        content: Move video decoding onto the GPU without changing what your tracker sees. A drop-in recipe that makes the NVDEC/PyTorch preprocessing path hand the model the same input tensor as the OpenCV CPU path, so you stop shipping raw frames over PCIe and keep tracker IDs stable.
         featured:
           name: Code
           link: https://github.com/Kagura-Ahad/nvdec-tensor-parity
@@ -283,10 +434,96 @@ params:
         links:
           - icon: fab fa-github
             url: https://github.com/Kagura-Ahad/nvdec-tensor-parity
+        stats:
+          - value: "0.011"
+            label: "RMSE between CPU and GPU input tensors"
+          - value: "0.998+"
+            label: "Pearson correlation"
+          - value: "IDs in sync"
+            label: "BoT-SORT tracks match the CPU baseline"
+        parity:
+          title: "Tensor parity: both approaches must hand the model the same numbers"
+          text: "Measured against the CPU tensor after the fix: RMSE ≈ 0.011, Pearson correlation ≥ 0.998."
+        outcomes:
+          title: "What parity decides for the tracker"
+          cards:
+            - kind: ok
+              title: "Parity achieved"
+              text: "Same tensor, same confidence scores. Detections stay put and the tracker keeps **one ID per object**."
+              frames:
+                - { label: "t",   tag: "ID 3", state: ok, dx: 0 }
+                - { label: "t+1", tag: "ID 3", state: ok, dx: 4 }
+                - { label: "t+2", tag: "ID 3", state: ok, dx: 8 }
+            - kind: miss
+              title: "Parity missed"
+              text: "Tiny numeric drift moves scores across the confidence threshold. Detections flicker and the tracker **changes the object's ID** (BoT-SORT)."
+              frames:
+                - { label: "t",   tag: "ID 3",   state: ok,     dx: 0 }
+                - { label: "t+1", tag: "missed", state: missed, dx: 4 }
+                - { label: "t+2", tag: "ID 8",   state: miss,   dx: 8 }
+        flow:
+          title: "Two ways to feed the model, one tensor to match"
+          alt: "Two rows compare Approach 1, where the CPU decodes and preprocesses and a heavy decoded frame of about 6 MB crosses PCIe, with Approach 2, where only a light encoded packet crosses PCIe and NVDEC decoding, BT.709 full-range colour conversion, normalisation and a bilinear letterbox resize run on the GPU. Both end in a model input tensor that must match."
+          caption: "Approach 1 decodes and preprocesses on the CPU and ships raw frames over PCIe. Approach 2 ships only the encoded stream and does everything on the GPU. Two fixes keep its tensor matching the CPU one: an explicit BT.709 full-range colour conversion at native size, then a sequential bilinear resize. A naive fused GPU path drifts by up to ≈ 0.12 per value, enough to flip detections at the confidence threshold and change tracker IDs."
+          source: { title: "Video source", text: "encoded packets, RTSP stream or file" }
+          connectors:
+            - { mode: elbow, from: src, to: a1 }
+            - { mode: elbow, from: src, to: b1 }
+            - { mode: bracket, from: t1, to: t2, label: "tensor parity" }
+          rows:
+            - accent: cpu
+              label: "APPROACH 1"
+              text: "the CPU decodes and preprocesses, raw pixels go to the GPU"
+              parts:
+                - zone:
+                    kind: cpu
+                    title: "CPU"
+                    sub: "system RAM"
+                    steps:
+                      - { id: a1, title: "Decode", sub: "FFmpeg demux and decode" }
+                      - { id: a2, title: "Colour convert", sub: "chroma upsample, YUV → BGR", pre: true }
+                      - { id: a3, title: "Letterbox resize", sub: "`cv2.resize` bilinear, then pad", pre: true }
+                      - { id: a4, title: "Reformat", sub: "BGR → RGB, HWC → CHW", pre: true }
+                - link: { kind: heavy, label: "PCIe", title: "Decoded frame", sub: "≈ 6 MB at 1080p", tag: "HEAVY" }
+                - zone:
+                    kind: gpu
+                    title: "GPU"
+                    sub: "VRAM"
+                    steps:
+                      - { id: a5, title: "Normalise", sub: "÷255, float32", pre: true }
+                      - { id: t1, title: "Model input", sub: "1×3×640×640 tensor", tensor: true }
+            - accent: gpu
+              label: "APPROACH 2"
+              text: "the CPU only receives packets, the encoded stream goes to the GPU, which does the rest"
+              parts:
+                - zone:
+                    kind: cpu
+                    title: "CPU"
+                    sub: "system RAM"
+                    steps:
+                      - { id: b1, title: "Receive packets", sub: "network demux only, no pixel work" }
+                - link: { kind: light, label: "PCIe", title: "Encoded packet", sub: "kilobytes per frame", tag: "LIGHT" }
+                - zone:
+                    kind: gpu
+                    title: "GPU"
+                    sub: "VRAM"
+                    steps:
+                      - { id: b2, title: "NVDEC decode", sub: "hardware decoder, NV12 in VRAM" }
+                      - { id: b3, title: "Colour convert", sub: "NV12 → RGB, BT.709, full range, native size", pre: true, badge: { n: 1, tip: "Fix 1: explicit colour context. Read the real colour space and range with ffprobe and convert at native resolution." } }
+                      - { id: b4, title: "Reformat", sub: "HWC → CHW, ÷255 float32", pre: true }
+                      - { id: b5, title: "Letterbox resize", sub: "`F.interpolate` bilinear, then pad", pre: true, badge: { n: 2, tip: "Fix 2: sequential resize. Resize after the colour conversion, as OpenCV does, instead of fusing the two steps." } }
+                      - { id: t2, title: "Model input", sub: "1×3×640×640 tensor", tensor: true }
+          legend:
+            - { swatch: pre, text: "preprocessing step, must give the same numbers" }
+            - { fix: 1, text: "explicit colour context" }
+            - { fix: 2, text: "sequential resize (hover the badges)" }
 
       - title: RTSMS Inference Optimization
-        content: A stage-by-stage record of speeding up a YOLOv9 + ByteTrack pipeline, from ~26 FPS in PyTorch to ~85 FPS with TensorRT, with profiling, benchmarks and an honest account of what didn't work yet.
-        image: /images/projects/rtsms.svg
+        id: rtsms
+        tagline: "A stage-by-stage speed-up of a YOLOv9 + ByteTrack pipeline."
+        headline: { value: "26 → 85 FPS", label: "PyTorch to TensorRT" }
+        short: RTSMS
+        content: Speed up a real-time YOLOv9 + ByteTrack detection and tracking pipeline, one measured step at a time, from my award-winning final-year project. Swap the tracker, move inference to TensorRT FP16 (26 to 85 FPS in Python), port to C++ and profile to find what is holding the GPU back, then go lower-level with raw TensorRT. Every stage is documented, including what does not work yet.
         featured:
           name: Code
           link: https://github.com/Kagura-Ahad/Dawlance-RTSMS-Inference-Pipeline-Optimization
@@ -297,12 +534,80 @@ params:
         links:
           - icon: fab fa-github
             url: https://github.com/Kagura-Ahad/Dawlance-RTSMS-Inference-Pipeline-Optimization
+        stats:
+          - value: "26 → 85 FPS"
+            label: "PyTorch + BoT-SORT to TensorRT + ByteTrack"
+          - value: "3.3×"
+            label: "faster, in Python"
+          - value: "Stage 3"
+            label: "raw TensorRT in C++, in progress"
+        bars:
+          title: "Frames per second at each step"
+          unit: "FPS"
+          decimals: 0
+          items:
+            - { label: "Stage 1C: TensorRT FP16 + ByteTrack (Python)", value: 85, tone: gpu, delta: "3.3× vs. A" }
+            - { label: "Stage 2: C++ with OpenCV DNN (CUDA)", value: 55, tone: cpu }
+            - { label: "Stage 1B: PyTorch + ByteTrack", value: 42, tone: muted }
+            - { label: "Stage 1A: PyTorch + BoT-SORT", value: 26, tone: muted }
+          note: "Approximate figures from the project write-up for a 640×640 YOLOv9 + ByteTrack stream. Stage 3, a raw TensorRT implementation in C++, is still in progress and has no result yet."
+        flow:
+          title: "Three stages of the optimization journey"
+          alt: "Three rows, one per stage. Stage 1, Python prototypes: frames are read with OpenCV, YOLOv9 runs in PyTorch or as a TensorRT FP16 engine, and BoT-SORT or ByteTrack tracks objects, giving 26 FPS for PyTorch with BoT-SORT, 42 FPS after swapping to ByteTrack and 85 FPS after moving to TensorRT. Stage 2, C++ port: GStreamer decode, OpenCV DNN inference on CUDA, then NMS with output parsing and a C++ ByteTrack on the CPU, which gprof marked as hotspots, reaching 55 FPS. Stage 3, low-level TensorRT in C++: a raw engine with CUDA streams and asynchronous buffers, shown dashed because it is not working yet."
+          caption: "Boxes are coloured by where they run, so the bottleneck is easy to see. The C++ port was slower than the Python TensorRT version because the tracker and post-processing still ran on the CPU, which is what profiling showed."
+          connectors: []
+          rows:
+            - accent: blue
+              label: "STAGE 1 · PYTHON PROTOTYPES"
+              text: "change one piece at a time and measure"
+              parts:
+                - lane:
+                    items:
+                      - { kind: amber, title: "Read frames", sub: "`cv2.VideoCapture`, 640×640 stream" }
+                      - { kind: gpu, title: "YOLOv9 inference", sub: "PyTorch in A and B, TensorRT FP16 engine in C" }
+                      - { kind: amber, title: "Track", sub: "BoT-SORT in A, ByteTrack in B and C", arrow: dashed }
+                      - { kind: fps, tone: grey, title: 'A <span class="big">26</span> FPS', sub: "PyTorch + BoT-SORT", arrow: green }
+                      - { kind: fps, tone: amber, title: 'B <span class="big">42</span> FPS', sub: "PyTorch + ByteTrack", note: "swapped the tracker", arrow: green }
+                      - { kind: fps, tone: green, title: 'C <span class="big">85</span> FPS', sub: "TensorRT + ByteTrack", note: "TensorRT FP16 engine", arrow: none }
+            - accent: blue
+              label: "STAGE 2 · C++ PORT"
+              text: "remove the Python overhead, then profile with gprof"
+              parts:
+                - lane:
+                    items:
+                      - { kind: amber, title: "GStreamer", sub: "hardware-accelerated video decode" }
+                      - { kind: gpu, title: "YOLOv9 inference", sub: "OpenCV DNN, CUDA backend, ONNX model" }
+                      - { kind: amber, hot: true, tag: "HOT", title: "NMS + parse outputs", sub: "still running on the CPU" }
+                      - { kind: amber, hot: true, tag: "HOT", title: "ByteTrack (C++)", sub: "custom implementation", arrow: dashed }
+                      - { kind: fps, tone: amber, title: '<span class="big">55</span> FPS', sub: "faster than PyTorch, slower than Python TensorRT", arrow: none }
+                      - callout: { tone: heavy, title: "gprof", text: "Tracker association and detector post-processing are each about **14%** of CPU time." }
+            - accent: blue
+              label: "STAGE 3 · LOW-LEVEL TENSORRT"
+              text: "keep inference on the GPU, managed through the CUDA API"
+              parts:
+                - lane:
+                    items:
+                      - { kind: amber, dashed: true, title: "GStreamer", sub: "hardware-accelerated video decode" }
+                      - { kind: gpu, dashed: true, title: "Raw TensorRT", sub: "deserialise a `.engine`, own CUDA stream" }
+                      - { kind: gpu, dashed: true, title: "GPU memory", sub: "`cudaMallocAsync` buffers, async enqueue" }
+                      - { kind: amber, dashed: true, title: "Parse + ByteTrack", sub: "manual tensor decoding, raw pointers", arrow: dashed }
+                      - { kind: fps, tone: red, dashed: true, title: "Not working yet", sub: "in progress", arrow: none }
+                      - callout: { tone: blue, title: "The lesson", text: "Debugging raw pointers and streams showed why CUDA fundamentals matter." }
+          legend:
+            - { icon: cpu, text: "CPU work" }
+            - { icon: gpu, text: "GPU work" }
+            - { swatch: hot, text: "CPU hotspot found by profiling" }
+            - { swatch: dashed, text: "in progress" }
 
       - title: Learning TensorRT 11
-        content: A public, continuously updated log of learning NVIDIA TensorRT 11 from the ground up. Heavily documented examples of the build and V3 async runtime lifecycle, with custom type stubs and notes on why the API is designed the way it is.
-        image: /images/projects/learning-tensorrt.svg
+        id: learning-tensorrt
+        tagline: "Notes from learning TensorRT 11, in public."
+        headline: { value: "In progress", label: "a learning log, not a finished project" }
+        cta: "Read my notes"
+        short: TensorRT 11
+        content: I'm learning NVIDIA TensorRT 11 and keeping a public log as I go. This isn't a polished project. It's where I write down what I work out, so I understand the design properly instead of copying boilerplate. So far that means building an engine and running it asynchronously with the V3 API. The code is heavily commented, and I generate my own type stubs so my editor can check it.
         featured:
-          name: Code
+          name: Notes and code
           link: https://github.com/Kagura-Ahad/learning_tensorRT
         badges:
           - "TensorRT 11"
@@ -311,10 +616,61 @@ params:
         links:
           - icon: fab fa-github
             url: https://github.com/Kagura-Ahad/learning_tensorRT
+        buttons:
+          - { name: "Notes and code", link: "https://github.com/Kagura-Ahad/learning_tensorRT" }
+        notes:
+          sections:
+            - title: "Why I'm learning the SDK itself"
+              text: "Most people meet TensorRT through a one-liner. With Ultralytics, for example, `model.export(format=\"engine\")` turns a YOLO checkpoint into a TensorRT engine, and that's a great way to start. I used exactly that in my RTSMS pipeline, and moving from PyTorch to a TensorRT FP16 engine took it from about 42 to 85 FPS. But that's one API of a much bigger SDK, and it only reaches as far as someone else's wrapper does. I want to learn the SDK itself: first the Python primitives (builder, network, config, engine, context, stream), and then C++."
+              compare:
+                left:
+                  title: "What one export call gives me"
+                  items:
+                    - "A ready-made engine for a model family the exporter already supports, like a standard YOLO."
+                    - "Sensible defaults: one input size, FP16 at most."
+                    - "No need to see how the engine was built."
+                right:
+                  title: "What the SDK itself opens up"
+                  items:
+                    - "Building a network and an engine myself, instead of only converting one."
+                    - "Models the exporter doesn't know, including unsupported layers and custom operations through plugins (`IPluginV3`)."
+                    - "Variable batch or sequence sizes, through optimization profiles."
+                    - "Precision and quantization I control, rather than one flag."
+                    - "Inspecting what TensorRT actually built, to see why an engine is slow or wrong."
+              after: "So I'm starting with the Python primitives, where it's quick to experiment, and moving on to C++, which is where the SDK is really built. The ideas carry across, and it's also my way back to the RTSMS C++ stage that isn't working yet."
+            - title: "Where else this could help me"
+              items:
+                - { text: "**Vision-language model inference**, my main focus. Pieces of these models, such as a vision encoder, can be compiled into engines. Knowing how to do it by hand means I can try it on models no exporter supports yet." }
+                - { text: "**Edge deployment.** On NVIDIA Jetson and in DeepStream, TensorRT engines are what actually run, and I already work on getting quantized vision models onto edge hardware." }
+                - { text: "**Quantization.** INT8 and FP8 are on my roadmap, and I want to understand what the builder does with them instead of trusting a flag." }
+                - { text: "**Multi-stream video pipelines** like ParaFlow. An engine is thread-safe and each run needs its own execution context, so I want to understand how many streams can share one engine and overlap work on CUDA streams." }
+                - { text: "**Finishing what I couldn't.** The raw TensorRT C++ stage of RTSMS isn't working yet. The Python bindings expose the same ideas (builder, network, engine, context, stream), so they're a gentler place to learn before going back." }
+                - { text: "**Debugging and profiling.** When an engine is slow or its outputs are off, being able to inspect it and read a profiler trace is the difference between guessing and knowing." }
+                - { text: "**Not depending on wrappers.** Tools hide details, and versions change (TensorRT 11 removed implicit batching). I want to know where to look when something breaks." }
+            - title: "What I've worked through so far"
+              items:
+                - { text: "Why the network definition (the *what*) and the builder config (the *how*) are kept separate." }
+                - { text: "Why you ask a builder to create a network instead of making one yourself: it's a factory that injects hardware context and keeps the C++ interface stable." }
+                - { text: "That TensorRT 11 removed implicit batching and made strongly-typed networks the default, so `create_network()` with no flags is the modern way." }
+                - { text: "How a built engine is serialized to bytes and loaded back by a deliberately small runtime, and why an engine and its execution context are separate." }
+                - { text: "How to run work asynchronously on a CUDA stream with `execute_async_v3`, and what `synchronize()` is waiting for." }
+            - title: "What I want to learn next"
+              checklist: true
+              items:
+                - { text: "The build and runtime lifecycle", done: true }
+                - { text: "Dynamic shapes with `IOptimizationProfile`" }
+                - { text: "Parsing ONNX models and handling unsupported layers" }
+                - { text: "Precision and quantization: FP16, then INT8 and FP8" }
+                - { text: "A reusable Python wrapper for engine, context and stream" }
+                - { text: "Custom plugins with `IPluginV3`" }
+          note: "Tested on TensorRT 11.2.1.2, CUDA 12.8, Ubuntu 24.04 and an RTX 3060 12 GB. Expect gaps and corrections: this is a notebook, and I'll fix things as I understand them better."
 
       - title: DocsKeeping
-        content: A GraphRAG question-answering system that reduces LLM hallucination through knowledge-graph traversal and semantic search, with Guardrails AI anonymizing sensitive data. Co-developed as a Spring 2025 project.
-        image: /images/projects/docskeeping.svg
+        id: docskeeping
+        tagline: "Answers questions from documentation, and says so when it can't."
+        headline: { value: "GraphRAG", label: "knowledge graph + semantic search" }
+        short: DocsKeeping
+        content: Answer questions about technical documentation without the model making things up. DocsKeeping collects documentation, Reddit threads and video subtitles, has an LLM turn them into a Neo4j knowledge graph with a vector index, and answers only from the text it retrieves, saying so when the answer isn't there. The demo uses Apple Vision Pro documentation. It's a team project from Spring 2025.
         featured:
           name: Code
           link: https://github.com/burhanuddin6/docskeeping
@@ -325,6 +681,46 @@ params:
         links:
           - icon: fab fa-github
             url: https://github.com/burhanuddin6/docskeeping
+        buttons:
+          - { name: "Code", link: "https://github.com/burhanuddin6/docskeeping" }
+        stats:
+          - value: "3"
+            label: "kinds of source: docs, Reddit threads, video subtitles"
+          - value: "Neo4j"
+            label: "knowledge graph with a vector index"
+          - value: "Declines"
+            label: "when the retrieved text has no answer"
+        graphrag:
+          title: "GraphRAG, layer by layer"
+          alt: "A pyramid of four layers, built from the bottom up. Text from documentation, Reddit threads and subtitles is read by an LLM, which extracts entities and relations into a knowledge graph of clustered nodes. Above it, topic clusters each get a node with an LLM-written summary, and at the top is a condensed overview. DocsKeeping builds the bottom two layers in Neo4j; the cluster and overview layers, from the original GraphRAG approach from Microsoft Research, are future work."
+          caption: "GraphRAG builds knowledge from the bottom up, and each layer is more condensed than the one below. DocsKeeping builds the bottom two layers in Neo4j. The topic clusters and summaries above them come from the original GraphRAG approach from Microsoft Research, and are future work."
+          steps:
+            - { title: "Read the text", scope: in, text: "Documentation, Reddit threads and video subtitles are collected and split into chunks of text." }
+            - { title: "Extract entities and relations", llm: true, scope: in, text: "An LLM reads each chunk and pulls out the entities (concepts, APIs, apps) and how they relate. Together they form the knowledge graph, stored in Neo4j with a vector index." }
+            - { title: "Cluster into topics", scope: full, text: "Densely connected entities are grouped into topic clusters, at several levels from fine-grained to broad." }
+            - { title: "Condense", llm: true, scope: full, text: "An LLM writes a short summary of each cluster, then summaries of summaries on the way up. The top is an overview of everything." }
+          ask: { title: "Asking a question", text: "A specific question starts at the entities, which is what DocsKeeping does: vector search, then a Cypher query. A broad one, like what the whole collection is about, can start from the summaries at the top." }
+        flow:
+          title: "From a question to a grounded answer"
+          alt: "A single row: the question is typed into a Streamlit chat, embedded and searched against the vector index, a Cypher query retrieves the matching text from the graph, a prompt tells the LLM to answer only from that context or say it cannot, and the LLM writes the answer, which is shown together with the retrieved text."
+          caption: "The prompt tells the model to answer only from what was retrieved and to say so when it can't, and the app shows the retrieved text next to the answer so it can be checked. Built by a team as a Spring 2025 project. I worked on the data collection and a Guardrails AI experiment, and the graph pipeline, retrieval and app were mostly built by Burhanuddin Ezzi, who maintains the repository."
+          connectors: []
+          rows:
+            - accent: gpu
+              label: "ASK"
+              text: "answer only from what was retrieved"
+              parts:
+                - lane:
+                    items:
+                      - { kind: tensor, title: "Your question", sub: "typed into a Streamlit chat" }
+                      - { kind: gpu, title: "Search", sub: "the question is embedded and the index finds the closest nodes" }
+                      - { kind: gpu, title: "Retrieve", sub: "a Cypher query pulls the matching text from the graph" }
+                      - { kind: gpu, title: "Prompt", sub: "answer only from this context, or say you can't" }
+                      - { kind: gpu, title: "LLM", sub: "writes the answer from the retrieved text" }
+                      - { kind: tensor, title: "Answer + context", sub: "shown together, so it can be checked", arrow: none }
+          legend:
+            - { swatch: dark, text: "data" }
+            - { swatch: gpu, text: "step" }
 
   contact:
     enable: true

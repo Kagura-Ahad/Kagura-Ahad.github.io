@@ -1,0 +1,34 @@
+{{ if .Site.Params.projects.enable | default false }}
+{{- $projects := .Site.Language.Params.projects | default .Site.Params.projects -}}
+<section id="projects" class="py-5">
+    <div class="container">
+        <div class="proj-heading">
+            <span class="proj-heading-gap" aria-hidden="true"></span>
+            <h3 class="text-center">{{ $projects.title | default .Site.Params.projects.title | default (i18n "projects") }}</h3>
+            <a class="proj-all" href="{{ "projects/" | relURL }}">All projects in detail <span aria-hidden="true">&rarr;</span></a>
+        </div>
+        <div class="proj-grid px-3 px-md-5">
+            {{ range $projects.items | default .Site.Params.projects.items }}
+            <article class="proj-card">
+                <div class="proj-badges">
+                    {{ range .badges }}<span class="proj-badge">{{ . }}</span>{{ end }}
+                </div>
+                <h5 class="proj-title"><a class="proj-link" href="{{ "projects/" | relURL }}#{{ .id }}">{{ .title }}</a></h5>
+                <p class="proj-tagline">{{ .tagline }}</p>
+                {{ with .headline }}
+                <div class="proj-headline"><span class="proj-value">{{ .value }}</span><span class="proj-label">{{ .label }}</span></div>
+                {{ end }}
+                <div class="proj-foot">
+                    <span class="proj-more">{{ .cta | default "Diagram and details" }} <span aria-hidden="true">&rarr;</span></span>
+                    <span class="proj-ext">
+                        {{ range .links }}
+                        <a href="{{ .url }}" target="_blank" rel="noopener" aria-label="{{ .url }}"><i class="{{ .icon }}"></i></a>
+                        {{ end }}
+                    </span>
+                </div>
+            </article>
+            {{ end }}
+        </div>
+    </div>
+</section>
+{{ end }}

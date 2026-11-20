@@ -18,6 +18,16 @@
 </head>
 
 <body class="light">
+  <script>
+    /* The site used to force light mode, which saved "light" in the browser every visit.
+       Clear that once so the default now follows the system/browser theme. */
+    try {
+      if (!localStorage.getItem("theme-default-v2")) {
+        localStorage.removeItem("pref-theme");
+        localStorage.setItem("theme-default-v2", "1");
+      }
+    } catch (e) {}
+  </script>
   <!-- javascripts -->
   <!-- <script src="/js/jquery-3.6.0.min.js"></script> -->
 
@@ -36,6 +46,7 @@
   {{- partial "scripts.html" . -}}
 
   <script src="{{ "section-nav.js" | relURL }}" defer></script>
+  <script src="{{ "navbar.js" | relURL }}" defer></script>
 
   <!-- for search -->
   <section id="search-content" class="py-2">

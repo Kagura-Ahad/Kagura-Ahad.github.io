@@ -1,0 +1,88 @@
+{{- /* Data-driven flow diagram. Called with (dict "flow" <flow> "id" <string>). Styles: static/flow.css, connectors: static/flow.js */ -}}
+{{- $f := .flow -}}
+{{- $bracket := false -}}{{ range $f.connectors }}{{ if eq .mode "bracket" }}{{ $bracket = true }}{{ end }}{{ end -}}
+<figure class="flow{{ if not $f.source }} flow-nosrc{{ end }}{{ if not $bracket }} flow-nobracket{{ end }}" id="flow-{{ .id }}" data-flow role="group" aria-label="{{ $f.alt }}" data-connectors='{{ $f.connectors | jsonify }}'>
+  {{ with $f.source }}
+  <div class="flow-source" id="flow-src"><b>{{ .title }}</b><small>{{ .text }}</small></div>
+  {{ end }}
+
+  <div class="flow-rows">
+    {{ range $f.rows }}
+    <section class="flow-row row-{{ .accent }}">
+      <div class="row-head"><b>{{ .label }}</b><span>{{ .text }}</span></div>
+      <div class="row-body">
+        {{ range .parts }}
+
+        {{ with .zone }}
+        <div class="zcol{{ if .stack }} stack{{ end }}" style="--n: {{ len .steps }}">
+          <div class="zone zone-{{ .kind }}">
+            <div class="zone-head">
+              {{ if or (eq .kind "cpu") (eq .kind "gpu") }}<img src="{{ printf "images/icons/%s.svg" .kind | relURL }}" alt="" width="40" height="40">{{ end }}
+              <div><b>{{ .title }}</b><small>{{ .sub }}</small></div>
+            </div>
+            <ol class="steps">{{ template "steps" .steps }}</ol>
+          </div>
+          {{ with .band }}
+          <div class="band"><img src="{{ "images/icons/gpu.svg" | relURL }}" alt="" width="40" height="40"><div><b>{{ .title }}</b><small>{{ .sub }}</small></div></div>
+          {{ end }}
+        </div>
+        {{ end }}
+
+        {{ with .link }}
+        <div class="link link-{{ .kind }}">
+          <div class="link-main">
+            <span class="link-pill">{{ .label }}</span>
+            <span class="link-arrow" aria-hidden="true"></span>
+            <div class="link-text"><b>{{ .title }}</b><small>{{ .sub }}</small></div>
+            <span class="link-tag">{{ .tag }}</span>
+          </div>
+          {{ with .band }}
+          <div class="link-band"><span class="dbl-arrow" aria-hidden="true"></span><span>{{ .top }}</span><span>{{ .bottom }}</span></div>
+          {{ end }}
+        </div>
+        {{ end }}
+
+        {{ with .callout }}
+        <div class="callout part tone-{{ .tone }}"><b>{{ .title }}</b><span>{{ .text | markdownify }}</span></div>
+        {{ end }}
+
+        {{ with .lane }}
+        <ol class="steps lane" style="--cols: {{ .cols | default 6 }}" data-dir="{{ .dir | default "ltr" }}">{{ template "steps" .items }}</ol>
+        {{ end }}
+
+        {{ end }}
+      </div>
+    </section>
+    {{ end }}
+  </div>
+
+  <svg class="flow-overlay" aria-hidden="true"></svg>
+
+  <ul class="flow-legend">
+    {{ range $f.legend }}<li>
+      {{ with .icon }}<img class="lg-icon" src="{{ printf "images/icons/%s.svg" . | relURL }}" alt="" width="22" height="22">{{ end }}
+      {{ with .swatch }}<i class="sw sw-{{ . }}"></i>{{ end }}
+      {{ with .fix }}<i class="fix-badge static">{{ . }}</i>{{ end }}
+      {{ with .tag }}<em class="step-tag static">{{ . }}</em>{{ end }}
+      <span>{{ .text | markdownify }}</span></li>{{ end }}
+  </ul>
+</figure>
+{{ with $f.caption }}<p class="flow-caption"><strong>{{ $f.title }}.</strong> {{ . | markdownify }}</p>{{ end }}
+
+{{ define "steps" }}
+{{ range . }}
+{{ with .callout }}
+<li class="callout tone-{{ .tone }}" style="grid-column: span {{ .span | default 1 }}"><b>{{ .title }}</b><span>{{ .text | markdownify }}</span></li>
+{{ else }}
+{{ $tt := .tagtone }}<li class="step{{ with .kind }} is-{{ . }}{{ end }}{{ if .pre }} is-pre{{ end }}{{ if .tensor }} is-tensor{{ end }}{{ if .hot }} is-hot{{ end }}{{ if .dashed }} is-dashed{{ end }}{{ if .down }} down{{ end }}{{ with .arrow }} arrow-{{ . }}{{ end }}{{ with .tone }} tone-{{ . }}{{ end }}"{{ with .id }} data-step="{{ . }}"{{ end }}>
+  {{ with .num }}<i class="step-num">{{ . }}</i>{{ end }}
+  <b>{{ .title | safeHTML }}</b>
+  {{ with .sub }}<span>{{ . | markdownify | replaceRE "_" "_<wbr>" | safeHTML }}</span>{{ end }}
+  {{ with .list }}<ul class="step-list">{{ range . }}<li>{{ . }}</li>{{ end }}</ul>{{ end }}
+  {{ with .note }}<small class="step-note">{{ . }}</small>{{ end }}
+  {{ with .badge }}<i class="fix-badge" tabindex="0" title="{{ .tip }}">{{ .n }}</i>{{ end }}
+  {{ with .tag }}<em class="step-tag{{ if $tt }} tag-{{ $tt }}{{ end }}">{{ . }}</em>{{ end }}
+</li>
+{{ end }}
+{{ end }}
+{{ end }}
