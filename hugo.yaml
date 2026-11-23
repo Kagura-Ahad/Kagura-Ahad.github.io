@@ -334,7 +334,7 @@ params:
         id: nvdec-paraflow
         tagline: "Many video streams, one batched predictor, pure Python."
         headline: { value: "+31.2%", label: "throughput vs. multithreading" }
-        short: ParaFlow
+        short: NVDEC - ParaFlow
         content: Batch many live video streams through one YOLO predictor in pure Python, without DeepStream. Each stream gets its own decoder process that decodes on NVDEC straight into a PyTorch tensor and hands it over by CUDA IPC, so frames never leave the GPU and the Python GIL stops being the bottleneck. A pure-Python stand-in for DeepStream's nvstreammux.
         featured:
           name: Code
@@ -422,7 +422,7 @@ params:
         id: nvdec-tensor-parity
         tagline: "GPU decoding that keeps tracker IDs identical to the CPU path."
         headline: { value: "0.011", label: "RMSE vs. the CPU input tensor" }
-        short: Tensor Parity
+        short: NVDEC - Tensor Parity
         content: Move video decoding onto the GPU without changing what your tracker sees. A drop-in recipe that makes the NVDEC/PyTorch preprocessing path hand the model the same input tensor as the OpenCV CPU path, so you stop shipping raw frames over PCIe and keep tracker IDs stable.
         featured:
           name: Code
@@ -669,7 +669,7 @@ params:
         id: docskeeping
         tagline: "Answers questions from documentation, and says so when it can't."
         headline: { value: "GraphRAG", label: "knowledge graph + semantic search" }
-        short: DocsKeeping
+        short: DocsKeeping (GraphRAG)
         content: Answer questions about technical documentation without the model making things up. DocsKeeping collects documentation, Reddit threads and video subtitles, has an LLM turn them into a Neo4j knowledge graph with a vector index, and answers only from the text it retrieves, saying so when the answer isn't there. The demo uses Apple Vision Pro documentation. It's a team project from Spring 2025.
         featured:
           name: Code
