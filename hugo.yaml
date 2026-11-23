@@ -330,7 +330,7 @@ params:
             - { swatch: gpu, text: "model training" }
             - { text: "numbers show the order of the steps" }
 
-      - title: NVDEC-ParaFlow
+      - title: NVDEC - ParaFlow
         id: nvdec-paraflow
         tagline: "Many video streams, one batched predictor, pure Python."
         headline: { value: "+31.2%", label: "throughput vs. multithreading" }
@@ -418,7 +418,7 @@ params:
             - { swatch: py, text: "Python coordination on the CPU" }
             - { tag: "GIL", text: "threads that share one GIL" }
 
-      - title: NVDEC Tensor Parity
+      - title: NVDEC - Tensor Parity
         id: nvdec-tensor-parity
         tagline: "GPU decoding that keeps tracker IDs identical to the CPU path."
         headline: { value: "0.011", label: "RMSE vs. the CPU input tensor" }
@@ -665,7 +665,7 @@ params:
                 - { text: "Custom plugins with `IPluginV3`" }
           note: "Tested on TensorRT 11.2.1.2, CUDA 12.8, Ubuntu 24.04 and an RTX 3060 12 GB. Expect gaps and corrections: this is a notebook, and I'll fix things as I understand them better."
 
-      - title: DocsKeeping
+      - title: DocsKeeping (GraphRAG)
         id: docskeeping
         tagline: "Answers questions from documentation, and says so when it can't."
         headline: { value: "GraphRAG", label: "knowledge graph + semantic search" }
