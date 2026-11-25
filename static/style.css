@@ -1,40 +1,82 @@
 /* Site overrides on top of hugo-profile (loaded via params.customCSS). */
 
-/* --- About: skills as a three-column grid of quiet boxes --- */
+/* --- Colour roles, roughly 60 / 30 / 10 ---
+   60: the page background.   30: neutral text, cards and the alternating --band.
+   10: three accents, blue (leads), coral and mint, taking turns by section and by card.
+   Each accent has two tokens:
+     --fill*    the bright colour, for buttons, tints, borders, rules and glows.
+     --accent*  the same hue for small text. In dark mode it equals --fill*; on the light
+                background the bright colours are unreadable as text, so it is a deeper shade.
+   --on-accent is the text colour on a solid bright fill. --glass* style the skill pills.
+   --accent matches primaryColor in hugo.yaml. */
+body {
+  --fill: #018ffd; --fill-2: #ff5436; --fill-3: #4fe3c1;
+  --accent: #0064c8; --accent-2: #bf3117; --accent-3: #00705c;
+  --on-accent: #0b1530; --band: #eef2f6;
+  --glass: rgba(255, 255, 255, 0.55); --glass-line: rgba(255, 255, 255, 0.95); --glass-edge: rgba(25, 38, 72, 0.09);
+  --button: #0071e3; --button-hover: #0064c8;
+  --pill-base: #ffffff;
+}
+body.dark {
+  --fill: #44adff; --fill-2: #ff8975; --fill-3: #74ffe0;
+  --accent: #44adff; --accent-2: #ff8975; --accent-3: #74ffe0;
+  --on-accent: #0f1720; --band: #131d29;
+  --glass: rgba(255, 255, 255, 0.05); --glass-line: rgba(255, 255, 255, 0.13); --glass-edge: rgba(0, 0, 0, 0.18);
+  --pill-base: var(--band);
+}
+
+/* --- About: skills as rows of pills that hug their text (static/skills.js evens out the rows) --- */
 #about .skills { font-weight: 500; }
 #about .skills-title { margin: 0 0 0.75rem; opacity: 0.9; }
 
 #about ul.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.7rem 0.6rem;
   margin: 0;
   padding: 0;
   overflow: visible;
 }
 #about ul.skills-grid li {
+  flex: 0 0 auto;
+  max-width: 100%;
   margin: 0;
-  padding: 0.4rem 0.8rem;
-  border: 1px solid color-mix(in srgb, var(--primary-color) 14%, transparent);
-  border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--primary-color) 5%, transparent);
-  font-size: 0.9rem;
+  padding: 0.65rem 1.15rem;
+  text-align: center;
+  border: 1px solid var(--glass-line);
+  border-radius: 0.85rem;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
+  box-shadow: 0 0 0 1px var(--glass-edge), inset 0 1px 0 var(--glass-line), 0 6px 16px rgba(15, 23, 32, 0.07);
+  font-size: 0.875rem;
   line-height: 1.4;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
 }
 #about ul.skills-grid li::before { content: none; }
-body.dark #about ul.skills-grid li {
-  border-color: color-mix(in srgb, var(--primary-color-dark) 16%, transparent);
-  background: color-mix(in srgb, var(--primary-color-dark) 6%, transparent);
+/* The three accents take turns from pill to pill. */
+#about ul.skills-grid li:nth-child(3n+1) { --pill: var(--accent); --pill-fill: var(--fill); }
+#about ul.skills-grid li:nth-child(3n+2) { --pill: var(--accent-3); --pill-fill: var(--fill-3); }
+#about ul.skills-grid li:nth-child(3n)   { --pill: var(--accent-2); --pill-fill: var(--fill-2); }
+#about ul.skills-grid li:hover {
+  color: var(--pill);
+  border-color: var(--pill);
+  background: color-mix(in srgb, var(--pill-fill) 13%, var(--pill-base));
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--pill-fill) 22%, transparent);
 }
-@media (max-width: 767.98px) {
-  #about ul.skills-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Soft colour behind the grid, so there is something for the glass to blur. */
+#about .skills { position: relative; isolation: isolate; }
+#about .skills::before {
+  content: ""; position: absolute; inset: -2rem 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(24% 36% at 24% 36%, color-mix(in srgb, var(--fill) 22%, transparent), transparent),
+    radial-gradient(26% 34% at 50% 66%, color-mix(in srgb, var(--fill-3) 18%, transparent), transparent),
+    radial-gradient(24% 36% at 76% 36%, color-mix(in srgb, var(--fill-2) 18%, transparent), transparent);
 }
 @media (max-width: 575.98px) {
-  #about ul.skills-grid { gap: 0.5rem; }
-  #about ul.skills-grid li { font-size: 0.76rem; padding: 0.3rem 0.5rem; }
+  #about ul.skills-grid { gap: 0.55rem 0.45rem; }
+  #about ul.skills-grid li { font-size: 0.75rem; padding: 0.55rem 0.75rem; border-radius: 0.7rem; }
 }
 
 /* --- Research & Recognition: card text is markdown now --- */
@@ -91,8 +133,7 @@ body.dark .project-stats li {
   border-color: color-mix(in srgb, var(--primary-color-dark) 16%, transparent);
   background: color-mix(in srgb, var(--primary-color-dark) 6%, transparent);
 }
-.project-stats .stat-value { font-weight: 600; font-size: 1.15rem; color: var(--primary-color); }
-body.dark .project-stats .stat-value { color: var(--primary-color-dark); }
+.project-stats .stat-value { font-weight: 600; font-size: 1.15rem; color: var(--hue, var(--accent)); }
 .project-stats .stat-label { color: var(--text-secondary-color); }
 body.dark .project-stats .stat-label { color: var(--text-secondary-color-dark); }
 
@@ -211,10 +252,8 @@ body.dark .project-switcher {
   transition: background 0.15s ease;
 }
 body.dark .project-switcher .chip { color: var(--text-color-dark); border-color: color-mix(in srgb, var(--primary-color-dark) 30%, transparent); }
-.projects-page .project-switcher a.chip:hover { text-decoration: none; background: color-mix(in srgb, var(--primary-color) 9%, transparent); }
-body.dark .projects-page .project-switcher a.chip:hover { background: color-mix(in srgb, var(--primary-color-dark) 12%, transparent); }
-.projects-page .project-switcher a.chip.active { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
-body.dark .projects-page .project-switcher a.chip.active { background: var(--primary-color-dark); border-color: var(--primary-color-dark); color: #0f1720; }
+.projects-page .project-switcher a.chip:hover { text-decoration: none; border-color: var(--hue-fill, var(--fill)); background: color-mix(in srgb, var(--hue-fill, var(--fill)) 14%, transparent); }
+.projects-page .project-switcher a.chip.active { font-weight: 700; background: var(--hue-fill, var(--fill)); border-color: var(--hue-fill, var(--fill)); color: var(--on-accent); }
 .project-switcher .chip-disabled { opacity: 0.45; cursor: default; border-style: dashed; }
 .projects-page.js-switcher .project-entry[hidden] { display: none; }
 
@@ -263,48 +302,43 @@ body.dark .bars-note { color: var(--text-secondary-color-dark); }
   position: relative; display: flex; flex-direction: column;
   padding: 1.15rem 1.25rem 1rem;
   border-radius: 1rem; background: var(--secondary-color);
-  border-top: 4px solid var(--primary-color);
+  border: 1px solid color-mix(in srgb, var(--text-secondary-color) 22%, transparent);
   box-shadow: 0 8px 40px rgba(15, 80, 100, 0.12);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-body.dark .proj-card { background: var(--secondary-color-dark); border-top-color: var(--primary-color-dark); box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35); }
-.proj-card:hover { transform: translateY(-5px); box-shadow: 0 10px 34px rgba(15, 80, 100, 0.2); }
+body.dark .proj-card { background: var(--secondary-color-dark); box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35); }
+.proj-card:hover { transform: translateY(-5px); border-color: var(--hue-fill, var(--fill)); box-shadow: 0 10px 34px rgba(15, 80, 100, 0.2); }
 
 .proj-badges { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.6rem; }
 .proj-badge {
   padding: 0.1rem 0.55rem; border-radius: 999px; font-size: 0.72rem; font-weight: 500;
-  background: color-mix(in srgb, var(--primary-color) 9%, transparent); color: var(--text-color);
+  background: color-mix(in srgb, var(--text-secondary-color) 14%, transparent); color: var(--text-color);
 }
-body.dark .proj-badge { background: color-mix(in srgb, var(--primary-color-dark) 14%, transparent); color: var(--text-color-dark); }
 
 .proj-title { margin: 0 0 0.35rem; font-size: 1.15rem; line-height: 1.3; }
 #projects .proj-link { color: var(--text-color) !important; text-decoration: none; }
 body.dark #projects .proj-link { color: var(--text-color-dark) !important; }
 .proj-link::after { content: ""; position: absolute; inset: 0; border-radius: 1rem; }   /* whole card is clickable */
 .proj-link:focus-visible { outline: none; }
-.proj-link:focus-visible::after { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+.proj-link:focus-visible::after { outline: 2px solid var(--hue, var(--accent)); outline-offset: 2px; }
 .proj-tagline { margin: 0 0 1rem; font-size: 0.9rem; color: var(--text-secondary-color); }
 body.dark .proj-tagline { color: var(--text-secondary-color-dark); }
 
 .proj-headline {
   margin-top: auto; padding: 0.6rem 0.8rem; border-radius: 0.6rem;
-  background: color-mix(in srgb, var(--primary-color) 6%, transparent);
-  border: 1px solid color-mix(in srgb, var(--primary-color) 14%, transparent);
+  background: color-mix(in srgb, var(--hue-fill, var(--fill)) 11%, transparent);
   display: flex; flex-direction: column; gap: 0.05rem;
 }
-body.dark .proj-headline { background: color-mix(in srgb, var(--primary-color-dark) 8%, transparent); border-color: color-mix(in srgb, var(--primary-color-dark) 18%, transparent); }
-.proj-value { font-size: 1.45rem; font-weight: 600; line-height: 1.2; color: var(--primary-color); }
-body.dark .proj-value { color: var(--primary-color-dark); }
+.proj-value { font-size: 1.45rem; font-weight: 600; line-height: 1.2; color: var(--hue, var(--accent)); }
 .proj-label { font-size: 0.78rem; color: var(--text-secondary-color); }
 body.dark .proj-label { color: var(--text-secondary-color-dark); }
 
 .proj-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 0.85rem; font-size: 0.85rem; }
-.proj-more { color: var(--text-link-color); font-weight: 500; }
-body.dark .proj-more { color: var(--text-link-color-dark); }
+.proj-more { color: var(--hue, var(--accent)); font-weight: 500; }
 .proj-card:hover .proj-more { text-decoration: underline; }
 .proj-ext { position: relative; z-index: 1; display: flex; gap: 0.7rem; }   /* above the stretched link */
 #projects .proj-ext a { color: var(--text-secondary-color) !important; font-size: 1.05rem; }
-#projects .proj-ext a:hover { color: var(--primary-color) !important; }
+#projects .proj-ext a:hover, body.dark #projects .proj-ext a:hover { color: var(--hue, var(--accent)) !important; }
 body.dark #projects .proj-ext a { color: var(--text-secondary-color-dark) !important; }
 
 
@@ -319,10 +353,8 @@ body.dark .notes-card { background: var(--secondary-color-dark); border-color: c
 .notes-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; max-width: 60rem; }
 .notes-list li { display: flex; gap: 0.7rem; align-items: baseline; }
 .notes-list p { margin: 0; }
-.notes-mark { flex: none; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--primary-color); transform: translateY(-0.1rem); opacity: 0.7; }
-body.dark .notes-mark { background: var(--primary-color-dark); }
-.is-checklist .notes-mark { width: 1.05rem; height: 1.05rem; border-radius: 0.25rem; border: 2px solid color-mix(in srgb, var(--primary-color) 50%, transparent); background: transparent; opacity: 1; transform: translateY(0.15rem); position: relative; }
-body.dark .is-checklist .notes-mark { border-color: color-mix(in srgb, var(--primary-color-dark) 55%, transparent); }
+.notes-mark { flex: none; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--hue-fill, var(--fill)); transform: translateY(-0.1rem); }
+.is-checklist .notes-mark { width: 1.05rem; height: 1.05rem; border-radius: 0.25rem; border: 2px solid var(--hue-fill, var(--fill)); background: transparent; transform: translateY(0.15rem); position: relative; }
 .is-checklist li.done .notes-mark { background: #1e8e55; border-color: #1e8e55; }
 .is-checklist li.done .notes-mark::after { content: ""; position: absolute; left: 0.28rem; top: 0.03rem; width: 0.3rem; height: 0.6rem; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
 .notes-note { margin: 1.1rem 0 0; font-size: 0.85rem; color: var(--text-secondary-color); }
@@ -359,3 +391,131 @@ body.dark .proj-all:hover { background: color-mix(in srgb, var(--primary-color-d
   .proj-heading-gap { display: none; }
   .proj-all { justify-self: center; }
 }
+
+/* --- Experience: as wide as the About section above it --- */
+#experience .container > .row { padding: 0 1rem; }
+#experience .container > .row > div { width: 100%; }
+
+/* --- Education: two compact cards side by side --- */
+.edu-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem;
+  max-width: 58rem; margin: 0 auto; padding: 2rem 0.25rem 0;
+}
+@media (max-width: 767.98px) { .edu-grid { grid-template-columns: 1fr; } }
+#education .card.edu-card {
+  border-radius: 1rem;
+  background-color: var(--secondary-color) !important;   /* otherwise Bootstrap's white shows at the corners */
+  border: 1px solid color-mix(in srgb, var(--text-secondary-color) 28%, transparent) !important;
+}
+#education .card.edu-card:hover { border-color: var(--hue-fill) !important; }
+#education .edu-card .card-body { display: flex; flex-direction: column; padding: 1.15rem 1.25rem 0.9rem; border-radius: 1rem; }
+#education .edu-card .card-title { margin-bottom: 0.3rem; font-size: 1.1rem; line-height: 1.35; }
+#education .edu-card h6 { margin-bottom: 0; }
+#education .edu-card .card-body > a { align-self: flex-start; text-decoration: none; }
+.education-content { margin-top: 0.6rem; font-size: 0.9rem; line-height: 1.45; }
+.education-content ul { margin: 0; padding-left: 1.1rem; }
+.edu-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; margin-top: auto; padding-top: 0.8rem; font-size: 0.9rem; }
+#education .edu-meta strong { color: var(--hue); }
+#education .edu-date { color: var(--text-secondary-color); }
+
+/* --- Which accent goes where --- */
+#content > section, .project-entry, .project-switcher .chip { --hue: var(--accent); --hue-fill: var(--fill); }
+#content > #about, #content > #achievements { --hue: var(--accent-2); --hue-fill: var(--fill-2); }
+.edu-card:nth-child(even) { --hue: var(--accent-3); --hue-fill: var(--fill-3); }
+.edu-card:nth-child(odd) { --hue: var(--accent); --hue-fill: var(--fill); }
+/* Cards, and each project with its chip, cycle lead, coral, green. */
+.proj-card:nth-child(3n+1), #achievements .row > div:nth-child(3n+1) { --hue: var(--accent); --hue-fill: var(--fill); }
+.proj-card:nth-child(3n+2), #achievements .row > div:nth-child(3n+2),
+.project-entry:nth-of-type(3n+2), .project-switcher .chip:nth-child(3n+2) { --hue: var(--accent-2); --hue-fill: var(--fill-2); }
+.proj-card:nth-child(3n), #achievements .row > div:nth-child(3n),
+.project-entry:nth-of-type(3n), .project-switcher .chip:nth-child(3n) { --hue: var(--accent-3); --hue-fill: var(--fill-3); }
+
+::selection { background: color-mix(in srgb, var(--fill) 30%, transparent); }
+
+/* --- Backgrounds: alternating bands, and a soft glow where the page opens and closes --- */
+#about, #education, #achievements { background: var(--band); }
+#hero, #contact {
+  background:
+    radial-gradient(42rem 26rem at 8% 18%, color-mix(in srgb, var(--fill) 15%, transparent), transparent 70%),
+    radial-gradient(38rem 26rem at 92% 82%, color-mix(in srgb, var(--fill-2) 12%, transparent), transparent 70%);
+}
+
+/* --- Headings: neutral, with a rule in the section's colour that runs slightly past the text --- */
+#content > section > .container > h3,
+#content > #about h3,
+#content > #education .container > h3,
+#projects .proj-heading h3 { color: var(--text-color) !important; }
+#content > section > .container > h3,
+#content > #about h3,
+.proj-heading h3,
+.projects-heading { width: fit-content; margin-inline: auto; }
+#content > section > .container > h3::after,
+#content > #about h3::after,
+.proj-heading h3::after,
+.projects-heading::after {
+  content: ""; display: block; width: calc(100% + 2rem); height: 3px; margin: 0.55rem 0 0 -1rem;
+  border-radius: 2px; background: var(--hue-fill, var(--fill));
+}
+/* Left-aligned headings (About Me, the Projects page): the rule starts with the text. */
+#content > #about h3, .projects-heading { margin-left: 0; }
+#content > #about h3::after,
+.projects-heading::after { margin-left: 0; }
+.projects-heading::after { margin-bottom: 0.6rem; }
+
+/* --- Navbar: Contact is the one outlined button --- */
+header .navbar .navbar-nav a:hover { color: var(--accent) !important; }
+header .navbar .navbar-nav a[href$="#contact"] {
+  border: 1px solid var(--fill); border-radius: 999px; color: var(--accent) !important; padding-inline: 1rem;
+}
+header .navbar .navbar-nav a[href$="#contact"]:hover { background: var(--fill); color: var(--on-accent) !important; }
+@media (min-width: 992px) { header .navbar .navbar-nav a[href$="#contact"] { margin-left: 0.5rem; padding-block: 0.3rem; } }
+@media (max-width: 991.98px) { header .navbar .navbar-nav a[href$="#contact"] { display: inline-block; } }
+
+/* --- Hero: one accent phrase and one solid button --- */
+#hero .subtitle { opacity: 1; color: var(--text-secondary-color); }
+#hero .subtitle::before {
+  content: ""; display: inline-block; width: 2.5rem; height: 2px; margin-right: 0.75rem;
+  vertical-align: middle; background: var(--fill);
+}
+#hero h1 { color: var(--text-color) !important; }
+#hero h2 { opacity: 1; color: var(--text-secondary-color); font-size: clamp(30px, 5vw, 48px); line-height: 1.2; }
+#hero h2 em { color: var(--accent); font-style: normal; }
+#hero p.hero-content { opacity: 1; color: color-mix(in srgb, var(--text-color) 82%, transparent); }
+#hero .hero-content strong { color: var(--text-color); }
+#hero a.btn:not(.social-icon) { border: 1px solid var(--button); background: var(--button); color: #ffffff !important; font-weight: 600; }
+#hero a.btn:not(.social-icon):hover { background: var(--button-hover) !important; color: #ffffff !important; opacity: 1; }
+#hero a.btn.social-icon { color: var(--text-secondary-color) !important; border-color: color-mix(in srgb, var(--text-secondary-color) 50%, transparent); }
+#hero a.btn.social-icon:hover { color: var(--accent) !important; border-color: var(--fill); opacity: 1; }
+
+/* --- About: bold words take turns through the three accents --- */
+#about .content { font-weight: 400; opacity: 1 !important; color: color-mix(in srgb, var(--text-color) 90%, transparent); }
+#about .content strong { color: var(--accent); }
+#about .content p:nth-of-type(2) strong { color: var(--accent-2); }
+#about .content p:nth-of-type(2) strong:nth-of-type(2) { color: var(--accent-3); }
+
+/* --- Experience: colour only marks where you are; bold stays neutral --- */
+#experience .tab-pane > *, #experience .tab-pane a { opacity: 1; }
+#experience .tab-pane li { color: color-mix(in srgb, var(--text-color) 82%, transparent); }
+#experience .tab-pane li strong { color: var(--text-color); }
+#experience .nav-item .nav-link.active,
+#experience .nav-item .nav-link:hover { border-bottom-color: var(--fill); }
+#experience .nav-item .nav-link.active { color: var(--accent) !important; opacity: 1; }
+#experience .tab-pane small { opacity: 1; color: var(--text-secondary-color); }
+#experience .experience-container .tab-content .tab-pane ul li::before { color: var(--accent); }
+
+/* --- Education and research cards --- */
+.education-content li::marker,
+#achievements .card-text li::marker { color: var(--hue); }
+#achievements .row { counter-reset: research; }
+#achievements .card-body::before {
+  counter-increment: research; content: counter(research, decimal-leading-zero);
+  display: block; margin-bottom: 0.6rem; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; color: var(--hue);
+}
+#achievements .card:hover, #achievements .card:focus { border-color: var(--hue-fill); }
+
+/* --- Projects page --- */
+.notes-card code { color: var(--hue); }
+
+/* --- Contact and footer --- */
+#contact a.btn { background: var(--fill) !important; border: 1px solid var(--fill) !important; color: var(--on-accent) !important; font-weight: 600; padding: 0.55rem 1.5rem; }
+footer a:hover { color: var(--accent) !important; }

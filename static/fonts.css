@@ -1,0 +1,18 @@
+/* Space Grotesk for headings, Inter for body text. Loaded after the theme's css/font.css, so it wins.
+   Linked from layouts/partials/head/extensions.html. */
+:root {
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: "Space Grotesk", var(--font-body);
+}
+
+body { font-family: var(--font-body) !important; }
+.primary-font, #primary-font, .secondary-font, #secondary-font, .default-font, #default-font, .tooltip {
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6,
+.navbar-brand, #experience .nav-pills .nav-link,
+#about .skills-title, .proj-value, .stat-value, .parity-banner strong, .outcome-head,
+#achievements .card-body::before {
+  font-family: var(--font-heading);
+}

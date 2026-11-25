@@ -1,0 +1,29 @@
+{{ if .Site.Params.education.enable | default false }}
+{{- $education := .Site.Language.Params.education | default .Site.Params.education -}}
+<section id="education" class="py-5">
+    <div class="container">
+        <h3 class="text-center">{{ $education.title | default .Site.Params.education.title | default (i18n "education") }}</h3>
+        <div class="edu-grid">
+            {{ range $education.items | default .Site.Params.education.items }}
+            <div class="card edu-card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ .title }}</h5>
+                    {{ if .school.url }}
+                    <a href="{{ .school.url }}" target="_blank" rel="noopener"><h6>{{ .school.name }}</h6></a>
+                    {{ else }}
+                    <h6>{{ .school.name }}</h6>
+                    {{ end }}
+                    {{ with .content }}
+                    <div class="education-content">{{ . | markdownify }}</div>
+                    {{ end }}
+                    <div class="edu-meta">
+                        <span>{{ with .GPA }}GPA: <strong>{{ . }}</strong>{{ end }}</span>
+                        <small class="edu-date">{{ .date }}</small>
+                    </div>
+                </div>
+            </div>
+            {{ end }}
+        </div>
+    </div>
+</section>
+{{ end }}

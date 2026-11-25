@@ -2,7 +2,8 @@
 #content > section[id] { scroll-margin-top: 70px; }
 
 #section-nav {
-  --sn-accent: var(--primary-color);
+  --sn-accent: var(--accent, var(--primary-color));
+  --sn-fill: var(--fill, var(--sn-accent));
   --sn-text: var(--text-color);
   --sn-muted: var(--text-secondary-color);
   --sn-surface: var(--secondary-color);
@@ -26,7 +27,6 @@
   transition: opacity 0.25s ease;
 }
 body.dark #section-nav {
-  --sn-accent: var(--primary-color-dark);
   --sn-text: var(--text-color-dark);
   --sn-muted: var(--text-secondary-color-dark);
   --sn-surface: var(--secondary-color-dark);
@@ -57,7 +57,7 @@ body.dark #section-nav {
 #section-nav ol::before { bottom: 0.7rem; background: var(--sn-muted); opacity: 0.3; }
 #section-nav .sn-fill {
   height: calc((100% - 1.4rem) * var(--sn-progress, 0));
-  background: var(--sn-accent);
+  background: var(--sn-fill);
   transition: height 0.2s ease-out;
 }
 
@@ -95,13 +95,13 @@ body.dark #section-nav {
 #section-nav a.active .sn-label { max-width: 11rem; opacity: 1; }
 #section-nav a:hover { color: var(--sn-text); }
 #section-nav a:focus-visible { outline: 2px solid var(--sn-accent); outline-offset: 2px; border-radius: 4px; }
-#section-nav a.passed .sn-dot { border-color: var(--sn-accent); background: var(--sn-accent); }
+#section-nav a.passed .sn-dot { border-color: var(--sn-fill); background: var(--sn-fill); }
 #section-nav a.active { color: var(--sn-accent); font-weight: 600; }
 #section-nav a.active .sn-dot {
   transform: scale(1.35);
-  border-color: var(--sn-accent);
-  background: var(--sn-accent);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--sn-accent) 22%, transparent);
+  border-color: var(--sn-fill);
+  background: var(--sn-fill);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--sn-fill) 22%, transparent);
 }
 
 /* Below 1560px the dock would sit on top of the content, so it becomes a small

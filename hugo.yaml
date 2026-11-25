@@ -36,24 +36,24 @@ params:
     lineHeight: 1.6
     textAlign: left
 
-  # Restrained ink-blue palette; quiet on purpose.
+  # Neutral base. primaryColor is the lead accent; the two supporting accents are in static/style.css.
   color:
     textColor: "#1f2933"
     secondaryTextColor: "#52606d"
-    textLinkColor: "#1d4e89"
+    textLinkColor: "#0064c8"
     backgroundColor: "#f7f8fa"
-    secondaryBackgroundColor: "#1d4e891a"
-    primaryColor: "#1d4e89"
+    secondaryBackgroundColor: "#0064c81a"
+    primaryColor: "#0064c8"
     secondaryColor: "#ffffff"
 
     darkmode:
       textColor: "#e4e7eb"
       secondaryTextColor: "#9aa5b1"
-      textLinkColor: "#8ab4f8"
+      textLinkColor: "#44adff"
       backgroundColor: "#0f1720"
       secondaryBackgroundColor: "#161f2b"
-      primaryColor: "#8ab4f8"
-      secondaryColor: "#161f2b"
+      primaryColor: "#44adff"
+      secondaryColor: "#1a2432"
 
   navbar:
     align: ms-auto
@@ -75,7 +75,7 @@ params:
     enable: true
     intro: "Hi, I'm"
     title: "Syed Ahad Ali."
-    subtitle: "Computer vision, and making vision-language models fast."
+    subtitle: "Computer vision, and making *vision-language models* fast."
     content: "I love computer vision. After finishing my BSc in Computer Science in 2025 I kept at it: first publishing low-resource NLP research at **ACL Findings**, and now researching **inference optimization for vision-language models**, backed by a systems background in real-time GPU video pipelines."
     image: /images/me.jpg
     roundImage: true
@@ -173,11 +173,6 @@ params:
               - Built an end-to-end **planogram compliance** pipeline for retail shelf photos: YOLO26x-seg product segmentation, Perception Encoder SKU matching and perspective-corrected row/column reconstruction to flag empty and misplaced slots, reaching **98%** agreement with the client's reference planogram on a 20-photo pilot.
               - Trained the segmentation model on SKU-110K with **SAM2** pseudo-masks (no manual mask annotation) and fine-tuned **PE-Core-B16** with supervised contrastive loss on 1,599 hand-labelled crops, so new products are added from reference crops without retraining.
               - Built a data-labelling pipeline (CVAT + Nuclio serverless) with auto-suggested labels to speed up dataset preparation for the pose and classification models.
-            featuredItems:
-              fontAwesomeIcons:
-                - icon: fab fa-github
-                  url: https://github.com/Kagura-Ahad/NVDEC-ParaFlow
-                  tooltip: Open-source writeup of the multi-stream decoding architecture
       - company: "Dawlance"
         companyUrl: "https://www.linkedin.com/company/dawlance/"
         jobs:
@@ -189,11 +184,6 @@ params:
               - Built a **real-time hazard-detection system in C++** for a workplace-safety application, using GStreamer for video handling, OpenCV DNN (YOLOv9 on GPU) for detection and a custom **C++ ByteTrack** implementation for tracking. It reached up to **90% accuracy** with near-zero false positives.
               - Made it **2x faster** by moving inference to **NVIDIA TensorRT** and rewriting core data handling directly against the CUDA API.
               - The project won the **Best FYP Award**.
-            featuredItems:
-              fontAwesomeIcons:
-                - icon: fab fa-github
-                  url: https://github.com/Kagura-Ahad/Dawlance-RTSMS-Inference-Pipeline-Optimization
-                  tooltip: Stage-by-stage optimization writeup
 
   education:
     enable: true
@@ -402,7 +392,7 @@ params:
                     steps:
                       - { id: p1, kind: gpu, title: "NVDEC decode", sub: "hardware decoder, NV12 surface", down: true }
                       - { id: p2, kind: gpu, title: "Convert into tensor", sub: "NV12 → RGB, written straight into a pre-allocated torch tensor", down: true }
-                      - { id: p3, kind: py, title: "share_memory_()", sub: "publishes a CUDA IPC handle" }
+                      - { id: p3, kind: py, title: "share_<wbr>memory_()", sub: "publishes a CUDA IPC handle" }
                 - link: { kind: light, label: "process boundary", title: "IPC handle", sub: "mp.Queue", tag: "NO PIXEL COPY", band: { top: "same VRAM", bottom: "mapped by IPC" } }
                 - zone:
                     kind: proc
